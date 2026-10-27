@@ -13,7 +13,7 @@
     merekUrl: 'https://itekno.id',
     // ID Google Sheet template (yang berisi script). Klien akan membuat salinannya.
     // Contoh: https://docs.google.com/spreadsheets/d/<ID_INI>/edit
-    templateSheetId: '1ZfoyGBplFewmJ9wqkgV8VsDkD5DuRasIVlNOZ-bqsxE/',
+    templateSheetId: '1ZfoyGBplFewmJ9wqkgV8VsDkD5DuRasIVlNOZ-bqsxE',
     // Nomor WhatsApp admin itekno.id untuk pembelian lisensi (format 62…, tanpa + atau spasi)
     adminWa: '081219967686',
     // Kunci PUBLIK pemeriksa lisensi (dari alat admin lisensi). Sama dengan KUNCI_PUBLIK_N di Code.gs.
