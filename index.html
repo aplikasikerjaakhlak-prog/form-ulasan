@@ -246,7 +246,7 @@
   const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .12 });
   document.querySelectorAll('.rv').forEach(x => io.observe(x));
   addEventListener('scroll', () => document.getElementById('hd').classList.toggle('s', scrollY > 10), { passive: true });
-  document.getElementById('waHarga').href = FU.waAktivasi({ nama: '(belum ada form)' }).replace(/text=.*/, 'text=' + encodeURIComponent('Halo admin itekno.id, saya ingin tahu harga lisensi Form Ulasan.'));
+  document.getElementById('waHarga').href = FU.linkWa(FU.SITUS.adminWa, 'Halo admin itekno.id, saya ingin tahu harga lisensi Form Ulasan.');
   setInterval(() => { const b = document.getElementById('baris'); b.classList.remove('new'); void b.offsetWidth; b.classList.add('new'); }, 4000);
 </script>
 </body>
