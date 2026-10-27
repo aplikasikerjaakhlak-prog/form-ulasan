@@ -12,7 +12,7 @@
     merek: 'itekno.id',
     merekUrl: 'https://itekno.id',
     // URL aplikasi web SERVER PUSAT (Server.gs milik admin), berakhiran /exec
-    apiUrl: 'ISI_URL_SERVER',
+    apiUrl: 'https://script.google.com/macros/s/AKfycbyU61lff_dNIhrRJcSe_F7orVEaExA6qNk__hPU25Sjp9P0cF0-pZVwYJlOPRHHVoK2gQ/exec',
     // Nomor WhatsApp admin itekno.id untuk pembelian lisensi (format 62…, tanpa + atau spasi)
     adminWa: '6281219967686',
     batasUji: 3             // jumlah ulasan pada mode uji coba
