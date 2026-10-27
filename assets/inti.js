@@ -11,13 +11,10 @@
     nama: 'Form Ulasan',
     merek: 'itekno.id',
     merekUrl: 'https://itekno.id',
-    // ID Google Sheet template (yang berisi script). Klien akan membuat salinannya.
-    // Contoh: https://docs.google.com/spreadsheets/d/<ID_INI>/edit
-    templateSheetId: '1ZfoyGBplFewmJ9wqkgV8VsDkD5DuRasIVlNOZ-bqsxE',
+    // URL aplikasi web SERVER PUSAT (Server.gs milik admin), berakhiran /exec
+    apiUrl: 'ISI_URL_SERVER',
     // Nomor WhatsApp admin itekno.id untuk pembelian lisensi (format 62…, tanpa + atau spasi)
     adminWa: '6281219967686',
-    // Kunci PUBLIK pemeriksa lisensi (dari alat admin lisensi). Sama dengan KUNCI_PUBLIK_N di Code.gs.
-    kunciPublikN: 'y4L2Vfc4fyuaQqm4MGkxLtA91dXqfdmCF-NsnigIVbiWlajQ3PW9N7gsaLCEB2koU3AsUtad25QjdX2BOOV2PzUzx7QLJtxoPlQl_NJPxeF5VD1KmsK4RKcFDf5hUL4dbnOUEnqUyRU93jChUc4rQtkzMczN2a1V2Tcte8gtGOHb29dCdF1UKIZ_qwCFL14QUaR6p9AgH8PoMQteKgPmre7AB79MWsx3JvZP_Jso5lhP99LycH2OSP7GwjJSwHdtvI74_7iwCI4BTI_KQJYLw_7bNasxbNl4d5weJjNYHQ391oJVJiyycFRGiT1_DvfoWsyluPwtzQBv-14QOlOI1w',
     batasUji: 3             // jumlah ulasan pada mode uji coba
   };
 
@@ -303,36 +300,27 @@
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   // id deployment Apps Script dari URL /exec
-  function idDariUrl(u) {
-    const m = String(u || '').trim().match(/script\.google\.com\/(?:a\/macros\/[^/]+|macros)\/s\/([A-Za-z0-9_-]{20,})\/(?:exec|dev)/);
-    return m ? m[1] : (/^[A-Za-z0-9_-]{30,}$/.test(String(u || '').trim()) ? String(u).trim() : '');
+  // ID form (10 karakter) dari link form / link dashboard / ID langsung
+  function idForm(u) {
+    u = String(u || '').trim();
+    const q = u.match(/[?&]s=([a-z0-9]{10})(?![a-z0-9])/i);
+    if (q) return q[1].toLowerCase();
+    return /^[a-z0-9]{10}$/i.test(u) ? u.toLowerCase() : '';
   }
-  const urlApi = id => 'https://script.google.com/macros/s/' + id + '/exec';
-
-  /* ---------- Lisensi ----------
-   * FUL1.<data base64url>.<tanda tangan RSA-SHA256 base64url>
-   * data: { i, e:email Gmail, d:ID deployment, n:nama usaha, x:berlaku s/d, w:watermark, t:terbit } */
-  function b64uBytes(s) { s = s.replace(/-/g, '+').replace(/_/g, '/'); s += '==='.slice((s.length + 3) % 4); return Uint8Array.from(atob(s), c => c.charCodeAt(0)); }
-  function bacaLisensi(lis) {
-    const m = /^FUL1\.([A-Za-z0-9_-]+)\.([A-Za-z0-9_-]+)$/.exec(String(lis || '').replace(/\s+/g, ''));
-    if (!m) return null;
-    try { return { data: JSON.parse(new TextDecoder().decode(b64uBytes(m[1]))), pesan: m[1], sig: m[2] }; } catch (e) { return null; }
+  const siapServer = () => /^https:\/\/script\.google\.com\//.test(SITUS.apiUrl);
+  // Panggil server pusat (POST text/plain agar tanpa preflight CORS)
+  function panggil(fn, args) {
+    if (!siapServer()) return Promise.reject(new Error('Server belum diatur (apiUrl di assets/inti.js).'));
+    return fetch(SITUS.apiUrl, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn, args }) })
+      .then(r => r.json()).then(j => { if (!j.ok) throw new Error(j.error || 'Gagal'); return j.data; })
+      .catch(e => { throw /Failed to fetch|NetworkError|Load failed|JSON|Unexpected/i.test(e.message) ? new Error('Koneksi ke server gagal. Periksa internet lalu coba lagi.') : e; });
+  }
+  function ambilConfig(id, signal) {
+    return fetch(SITUS.apiUrl + '?api=config&s=' + encodeURIComponent(id), { redirect: 'follow', signal })
+      .then(r => r.json()).then(j => { if (!j.ok) throw new Error(j.error || 'Gagal'); return j.data; });
   }
   const hariIni = () => new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 10);   // WIB
-  async function cekLisensi(lis, sid) {
-    const L = bacaLisensi(lis);
-    if (!L) return { sah: false, alasan: lis ? 'Format lisensi tidak dikenali' : 'Belum ada lisensi' };
-    if (/^ISI_/.test(SITUS.kunciPublikN)) return { sah: false, alasan: 'Kunci publik belum diatur', data: L.data };
-    try {
-      const key = await crypto.subtle.importKey('jwk', { kty: 'RSA', n: SITUS.kunciPublikN, e: 'AQAB', alg: 'RS256', ext: true },
-        { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['verify']);
-      const ok = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', key, b64uBytes(L.sig), new TextEncoder().encode(L.pesan));
-      if (!ok) return { sah: false, alasan: 'Lisensi tidak sah', data: L.data };
-    } catch (e) { return { sah: false, alasan: 'Lisensi tidak bisa diperiksa', data: L.data }; }
-    if (sid && L.data.d !== sid) return { sah: false, alasan: 'Lisensi untuk form lain (ID berbeda)', data: L.data };
-    if (L.data.x && hariIni() > L.data.x) return { sah: false, alasan: 'Lisensi berakhir ' + L.data.x, data: L.data, kedaluwarsa: true };
-    return { sah: true, data: L.data };
-  }
+
   function waAktivasi(o) {
     const t = ['Halo admin itekno.id, saya ingin ' + (o.perpanjang ? 'memperpanjang' : 'mengaktifkan') + ' *Form Ulasan*.', '',
       'Nama usaha: ' + (o.nama || '-'), 'Email Gmail: ' + (o.email || '-'), 'ID form: ' + (o.id || '-'), '', 'Mohon info harga & cara pembayarannya. Terima kasih.'].join('\n');
@@ -374,6 +362,6 @@
   function rrect(x, a, b, w, h, r) { x.beginPath(); x.moveTo(a + r, b); x.arcTo(a + w, b, a + w, b + h, r); x.arcTo(a + w, b + h, a, b + h, r); x.arcTo(a, b + h, a, b, r); x.arcTo(a, b, a + w, b, r); x.closePath(); }
 
 
-  W.FU = { SITUS, kartuQR, bacaLisensi, cekLisensi, waAktivasi, linkWa, hariIni, FONT, LATAR, SUDUT, WARNA_CEPAT, TIPE, LABEL_BINTANG, EMOJI, MAKS_PERTANYAAN, TEMPLATE, SELESAI_DASAR,
-           cfgBaru, rapikan, rapikanQ, pertanyaanBaru, skor, palet, campur, esc, amanUrl, amanGambar, idDariUrl, urlApi };
+  W.FU = { SITUS, kartuQR, idForm, panggil, ambilConfig, siapServer, waAktivasi, linkWa, hariIni, FONT, LATAR, SUDUT, WARNA_CEPAT, TIPE, LABEL_BINTANG, EMOJI, MAKS_PERTANYAAN, TEMPLATE, SELESAI_DASAR,
+           cfgBaru, rapikan, rapikanQ, pertanyaanBaru, skor, palet, campur, esc, amanUrl, amanGambar };
 })(window);

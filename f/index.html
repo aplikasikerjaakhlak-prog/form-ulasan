@@ -242,7 +242,7 @@
   const esc = FU.esc;
   const P = new URLSearchParams(location.search);
   const MODE = P.get('pratinjau') ? 'pratinjau' : P.get('demo') ? 'demo' : 'live';
-  const SID = FU.idDariUrl(P.get('s') || '');
+  const SID = FU.idForm(P.get('s') || '');
   const KEY = 'fu_' + (SID || 'demo').slice(-16);
 
   let C = null;            // konfigurasi
@@ -522,10 +522,6 @@
     return n ? n.split(/\s+/)[0] : '';
   }
 
-  function panggil(fn, args) {
-    return fetch(FU.urlApi(SID), { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn, args }) })
-      .then(r => r.json()).then(j => { if (!j.ok) throw new Error(j.error || 'Gagal'); return j.data; });
-  }
 
   function kirim() {
     if (mengirim) return;
@@ -533,11 +529,11 @@
     const data = paket();
     if (MODE !== 'live') return selesai();
     mengirim = true; b.disabled = true; b.innerHTML = '<span class="spin"></span>Mengirim…';
-    panggil('kirim', [data])
+    FU.panggil('kirim', [SID, data])
       .then(() => { mengirim = false; if (SISA !== null) { SISA = Math.max(0, SISA - 1); pasangTema(); } try { localStorage.setItem(KEY + '_isi', new Date().toLocaleDateString('en-CA')); } catch (e) {} selesai(); })
       .catch(e => {
         mengirim = false; b.disabled = false; b.innerHTML = isiAwal;
-        $('err').textContent = /Failed to fetch|NetworkError|Load failed/i.test(e.message) ? 'Koneksi bermasalah. Periksa internet lalu tekan Kirim lagi.' : 'Gagal mengirim: ' + e.message;
+        $('err').textContent = /Koneksi/i.test(e.message) ? 'Koneksi bermasalah. Periksa internet lalu tekan Kirim lagi.' : 'Gagal mengirim: ' + e.message;
       });
   }
 
@@ -630,27 +626,25 @@
     let cache = null; try { cache = JSON.parse(localStorage.getItem(CK)); } catch (e) {}
     if (cache && cache.cfg) terapkan(cache);   // tampil cepat dari simpanan, lalu diperbarui
     const ctrl = new AbortController(); const to = setTimeout(() => ctrl.abort(), 15000);
-    fetch(FU.urlApi(SID) + '?api=config', { signal: ctrl.signal, redirect: 'follow' })
-      .then(r => r.json())
-      .then(j => {
+    FU.ambilConfig(SID, ctrl.signal)
+      .then(x => {
         clearTimeout(to);
-        if (!j.ok) throw new Error(j.error || 'Gagal');
-        if (!j.data.cfg) return status('🛠️', 'Form belum diterbitkan', 'Pemilik usaha belum menyelesaikan pengaturan form ini.');
-        const d = { cfg: j.data.cfg, lisensi: j.data.lisensi || '', jumlah: +j.data.jumlah || 0, batas: +j.data.batas || FU.SITUS.batasUji };
+        if (!x.cfg) return status('🛠️', 'Form belum diterbitkan', 'Pemilik usaha belum menyelesaikan pengaturan form ini.');
+        const d = { cfg: x.cfg, aktif: !!x.aktif, sisa: x.sisa, wm: x.wm !== false };
         try { localStorage.setItem(CK, JSON.stringify(d)); } catch (e) {}
         if (!cache || JSON.stringify(cache) !== JSON.stringify(d)) { if (!cache || pos === 0) terapkan(d); }
       })
-      .catch(() => {
+      .catch(e => {
         clearTimeout(to);
+        if (/tidak ditemukan/i.test(e.message)) { try { localStorage.removeItem(CK); } catch (x) {} return status('🔗', 'Form tidak ditemukan', 'Link form tidak dikenal. Pindai ulang kode QR atau minta link terbaru dari pemilik usaha.'); }
         if (!cache) status('📡', 'Form gagal dimuat', 'Periksa koneksi internet Anda.', '<button class="btn pri" style="margin-top:16px" onclick="location.reload()">Coba lagi</button>');
       });
   }
-  // Lisensi: form aktif penuh jika lisensi sah untuk form ini; jika tidak, mode uji coba (maks. 3 ulasan)
-  async function terapkan(d) {
-    const L = await FU.cekLisensi(d.lisensi, SID);
-    WM = !L.sah || !!(L.data && L.data.w);
-    SISA = L.sah ? null : Math.max(0, d.batas - d.jumlah);
-    if (!L.sah && SISA <= 0) {
+  // Status dari server pusat: aktif (berlisensi) atau uji coba (maks. 3 ulasan)
+  function terapkan(d) {
+    WM = d.wm;
+    SISA = d.aktif ? null : Math.max(0, +d.sisa || 0);
+    if (!d.aktif && SISA <= 0) {
       C = FU.rapikan(d.cfg); pasangTema();
       return status('🔒', 'Form belum aktif', 'Pemilik usaha sedang menyiapkan form ini. Silakan coba lagi nanti.');
     }

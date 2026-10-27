@@ -248,9 +248,17 @@
 
   /* ================= Status & penyimpanan draf ================= */
   const DRAF = 'fu_builder_v1';
-  let S = muat() || { cfg: FU.cfgBaru('kafe'), sek: 'template', buka: null, kon: { url: '', kunci: '', ingat: true }, terbit: '', link: '', sheetUrl: '' };
+  const KON0 = () => ({ id: '', kunci: '', email: '', ingat: true });
+  let S = muat() || { cfg: FU.cfgBaru('kafe'), sek: 'template', buka: null, kon: KON0(), terbit: '', info: null };
   function muat() {
-    try { const d = JSON.parse(localStorage.getItem(DRAF)); if (d && d.cfg) { d.cfg = FU.rapikan(d.cfg); d.kon = d.kon || { url: '', kunci: '', ingat: true }; return d; } } catch (e) {}
+    try {
+      const d = JSON.parse(localStorage.getItem(DRAF));
+      if (d && d.cfg) {
+        d.cfg = FU.rapikan(d.cfg);
+        if (!d.kon || !d.kon.id) { d.kon = Object.assign(KON0(), d.kon && d.kon.id ? d.kon : {}); delete d.kon.url; if (!d.kon.id) { d.terbit = ''; d.info = null; } }
+        return d;
+      }
+    } catch (e) {}
     return null;
   }
   let tSimpan;
@@ -268,7 +276,7 @@
   function statusTerbit() {
     const beda = S.terbit && S.terbit !== JSON.stringify(FU.rapikan(S.cfg));
     $('stat').className = 'simpanStat' + (S.terbit ? (beda ? ' beda' : ' ok') : '');
-    $('btnTerbit').textContent = S.lis && S.lis.aktif ? 'Terbitkan' : 'Uji coba';
+    $('btnTerbit').textContent = S.kon.id ? 'Terbitkan' : 'Uji coba';
     $('statTxt').textContent = !S.terbit ? 'Draf tersimpan di perangkat ini' : beda ? 'Ada perubahan belum diterbitkan' : 'Sudah diterbitkan';
   }
 
@@ -296,7 +304,7 @@
     ['sambutan', 'Sambutan', 'Halaman pembuka'],
     ['pertanyaan', 'Pertanyaan', 'Susun pertanyaan'],
     ['selesai', 'Halaman selesai', 'Pesan & tombol'],
-    ['terbit', 'Uji coba & aktivasi', 'Hubungkan Google Sheet']
+    ['terbit', 'Uji coba & aktivasi', 'Coba gratis & aktifkan']
   ];
   function nav() {
     $('side').innerHTML = SEK.map((s, i) => `<button data-s="${s[0]}" class="${S.sek === s[0] ? 'on' : ''}"><span class="n">${i + 1}</span><span><b>${s[1]}</b><small>${s[2]}</small></span></button>`).join('') +
@@ -560,124 +568,100 @@
     ]));
   }
 
-  /* ================= 6. Hubungkan & terbitkan ================= */
-  const SITUS_URL = () => new URL('./', location.href).href;
-  const linkForm = id => SITUS_URL() + 'f/?s=' + id;
-  function panggil(id, fn, args) {
-    return fetch(FU.urlApi(id), { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn, args }) })
-      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then(j => { if (!j.ok) throw new Error(j.error); return j.data; })
-      .catch(e => { throw /Failed to fetch|NetworkError|Load failed|JSON|Unexpected token|HTTP/i.test(e.message)
-        ? new Error('Server tidak merespons. Pastikan URL benar dan saat Deploy "Who has access" = Anyone.') : e; });
-  }
-  // Pesan ramah jika script di Sheet klien belum diberi izin akses
-  function pesanIzin(e) {
-    return /izin|permission|authoriz/i.test(e || '')
-      ? '<b>Script belum diizinkan.</b> Di Sheet salinan buka <b>Ekstensi → Apps Script</b>, pilih fungsi <code>izinkanAkses</code> (atau <code>doGet</code>) di toolbar → klik <b>▶ Jalankan</b> → <b>Tinjau izin</b> → pilih akun → <b>Lanjutan → Buka … (tidak aman)</b> → <b>Izinkan</b>. Setelah itu tempel ulang URL di atas.'
-      : esc(e);
-  }
+  /* ================= 6. Uji coba & aktivasi (server pusat) ================= */
+  const linkForm = id => new URL('f/?s=' + id, new URL('./', location.href)).href;
+  const sibuk = (b, on, teks) => { b.disabled = on; if (on) { b._h = b.innerHTML; b.innerHTML = `<span class="spin${b.classList.contains('sec') ? ' dk' : ''}"></span>${teks}`; } else if (b._h) b.innerHTML = b._h; };
+  const pesan = (box, kelas, html) => { if ($(box)) $(box).innerHTML = html ? `<div class="msg ${kelas}">${html}</div>` : ''; };
   function rTerbit(m) {
-    const k = S.kon, id = FU.idDariUrl(k.url), tmpl = FU.SITUS.templateSheetId;
-    const urlSalin = 'https://docs.google.com/spreadsheets/d/' + tmpl + '/copy';
-    const aktif = !!(S.lis && S.lis.aktif);
-    m.innerHTML = `<h2>Uji coba & aktivasi</h2><p class="desc">Hubungkan ke <b>Google Sheet milik Anda sendiri</b> (±3 menit), lalu uji coba gratis dengan <b>${FU.SITUS.batasUji} ulasan</b>. Jika cocok, aktifkan form untuk ulasan tanpa batas.</p>
-    <div class="card">
-      <div class="step${id ? ' ok' : ''}"><span class="no">${id ? '✓' : 1}</span><div class="sb"><h4>Salin template Google Sheet ke Drive Anda</h4>
-        <p class="hint" style="margin-bottom:10px">Login dengan akun Google yang akan menyimpan data ulasan, lalu klik <b>Buat salinan</b>.</p>
-        <a class="btn sec" href="${esc(urlSalin)}" target="_blank" rel="noopener">${IC.copy}Buat salinan template</a>
-        ${/^ISI_/.test(tmpl) ? '<div class="msg warn">⚠️ ID template belum diisi di <code>assets/inti.js</code> (pengaturan pemilik situs).</div>' : ''}</div></div>
-      <div class="step${id ? ' ok' : ''}"><span class="no">${id ? '✓' : 2}</span><div class="sb"><h4>Pasang (Deploy) sebagai aplikasi web</h4>
-        <ol><li>Di Sheet salinan: menu <b>Ekstensi → Apps Script</b>.</li>
-          <li>Klik tombol biru <b>Deploy → New deployment</b>, pilih jenis ⚙️ <b>Web app</b>.</li>
-          <li>Execute as: <b>Me</b> · Who has access: <b>Anyone</b> → <b>Deploy</b>.</li>
-          <li>Klik <b>Authorize access</b> (Izinkan akses), pilih akun Anda. Jika muncul "Google hasn't verified this app": klik <b>Advanced → Go to … (unsafe)</b> → <b>Allow</b>. (Aman — script berjalan di akun Anda sendiri.)</li>
-          <li>Salin <b>Web app URL</b> dan tempel di bawah.</li></ol>
-        <div class="f"><input class="in" id="kUrl" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(k.url)}"></div>
-        <div id="mUrl"></div></div></div>
-      <div class="step${S.terbit ? ' ok' : ''}"><span class="no">${S.terbit ? '✓' : 3}</span><div class="sb"><h4>Masukkan kunci admin & ${aktif ? 'terbitkan' : 'mulai uji coba'}</h4>
-        <p class="hint" style="margin-bottom:8px">Kunci ada di tab <b>Mulai</b> pada Google Sheet Anda (format <code>FU-XXXX-XXXX-XXXX</code>). Muncul setelah Sheet dibuka/di-deploy.</p>
-        <div class="f"><input class="in" id="kKunci" placeholder="FU-XXXX-XXXX-XXXX" value="${esc(k.kunci)}" autocomplete="off" style="font-family:ui-monospace,monospace;text-transform:uppercase"></div>
-        <label class="tgl" style="padding:0 0 10px"><span><small>Ingat kunci di perangkat ini</small></span><span class="sw"><input type="checkbox" id="kIngat"${k.ingat ? ' checked' : ''}><span></span></span></label>
-        <div class="btnrow" style="justify-content:flex-start"><button class="btn pri" id="bTerbit">${S.terbit ? '🚀 Terbitkan perubahan' : '🧪 Terbitkan uji coba'}</button>
-        <button class="btn sec" id="bMuat" title="Ambil desain yang sudah tersimpan di Google Sheet">Buka desain dari Sheet</button></div>
-        <div id="mTerbit"></div></div></div>
-    </div><div id="hasil"></div>`;
-    $('kUrl').oninput = e => { k.url = e.target.value.trim(); ubah(); cekUrl(); };
-    $('kKunci').oninput = e => { k.kunci = e.target.value.trim().toUpperCase(); ubah(); };
-    $('kIngat').onchange = e => { k.ingat = e.target.checked; ubah(); };
-    const pesan = (box, kelas, html) => { $(box).innerHTML = html ? `<div class="msg ${kelas}">${html}</div>` : ''; };
-    function cekUrl() {
-      if (!k.url) return pesan('mUrl');
-      if (!FU.idDariUrl(k.url)) return pesan('mUrl', 'err', 'Format URL belum benar. Harus seperti <code>https://script.google.com/macros/s/…/exec</code>');
-      pesan('mUrl', 'info', '<span class="spin dk"></span> Mengecek koneksi…');
-      const id0 = FU.idDariUrl(k.url);
-      fetch(FU.urlApi(id0) + '?api=ping', { redirect: 'follow' }).then(r => r.json()).then(j => {
-        if (FU.idDariUrl(k.url) !== id0) return;
-        j.ok ? pesan('mUrl', 'ok', '✓ Terhubung ke Google Sheet Anda. Lanjut ke langkah 3.') : pesan('mUrl', 'err', pesanIzin(j.error));
-      }).catch(() => { if (FU.idDariUrl(k.url) === id0) pesan('mUrl', 'err', 'Belum terhubung. Pastikan URL benar dan saat Deploy "Who has access" = <b>Anyone</b>.'); });
+    const k = S.kon;
+    if (!FU.siapServer()) {
+      m.innerHTML = `<h2>Uji coba & aktivasi</h2><div class="msg warn">⚠️ Server belum diatur: isi <code>apiUrl</code> di <code>assets/inti.js</code> (pengaturan pemilik situs).</div>`;
+      return;
     }
-    let tCek; $('kUrl').addEventListener('input', () => { clearTimeout(tCek); tCek = setTimeout(cekUrl, 500); });
-    if (k.url) cekUrl();
-    const sibuk = (b, on, teks) => { b.disabled = on; if (on) { b._h = b.innerHTML; b.innerHTML = `<span class="spin${b.classList.contains('sec') ? ' dk' : ''}"></span>${teks}`; } else if (b._h) b.innerHTML = b._h; };
-    const syarat = () => {
-      const id = FU.idDariUrl(k.url);
-      if (!id) { pesan('mTerbit', 'err', 'Isi Web app URL di langkah 2 dulu.'); $('kUrl').focus(); return null; }
-      if (!/^FU-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(k.kunci)) { pesan('mTerbit', 'err', 'Kunci admin belum benar. Salin dari tab <b>Mulai</b> di Google Sheet Anda.'); $('kKunci').focus(); return null; }
-      return id;
-    };
+    if (!k.id) {
+      m.innerHTML = `<h2>Uji coba & aktivasi</h2><p class="desc">Coba form Anda secara gratis dengan <b>${FU.SITUS.batasUji} ulasan</b> sungguhan — tanpa pengaturan teknis apa pun. Jika cocok, aktifkan untuk ulasan tanpa batas.</p>
+      <div class="card"><h3>🧪 Mulai uji coba gratis</h3>
+        <div class="f"><label>Email Gmail usaha Anda <small>(untuk lisensi &amp; Google Sheet nanti)</small></label><input class="in" id="kEmail" type="email" placeholder="nama@gmail.com" value="${esc(k.email)}"></div>
+        <button class="btn pri" id="bMulai">🧪 Mulai uji coba</button><div id="mMulai"></div></div>
+      <div class="card"><h3>🔑 Sudah punya form?</h3><p class="hint" style="margin-bottom:10px">Buka form yang sudah dibuat dari perangkat lain dengan link form dan kunci klien.</p>
+        <div class="row2"><div class="f"><label>Link form</label><input class="in" id="kLink" placeholder="…/f/?s=xxxxxxxxxx"></div>
+        <div class="f"><label>Kunci klien</label><input class="in" id="kKunci" placeholder="FU-XXXX-XXXX-XXXX" style="font-family:ui-monospace,monospace;text-transform:uppercase"></div></div>
+        <button class="btn sec" id="bMasuk">Buka form saya</button><div id="mMasuk"></div></div>`;
+      $('kEmail').oninput = e => { k.email = e.target.value.trim(); simpanDraf(); };
+      $('bMulai').onclick = () => {
+        if (k.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(k.email)) return pesan('mMulai', 'err', 'Format email belum benar.');
+        const b = $('bMulai'), cfg = FU.rapikan(S.cfg); sibuk(b, true, 'Menyiapkan form…');
+        FU.panggil('daftar', [cfg, k.email]).then(d => {
+          k.id = d.id; k.kunci = d.kunci; S.terbit = JSON.stringify(cfg); S.info = { aktif: false, uji: 0, batas: FU.SITUS.batasUji, emailServer: d.emailServer };
+          ubah(); rTerbit(m); toast('🧪 Form uji coba siap dicoba'); tampilKunci(true);
+        }).catch(e => { sibuk(b, false); pesan('mMulai', 'err', esc(e.message)); });
+      };
+      $('bMasuk').onclick = () => {
+        const id = FU.idForm($('kLink').value), kc = $('kKunci').value.trim().toUpperCase();
+        if (!id) return pesan('mMasuk', 'err', 'Link form belum benar.');
+        const b = $('bMasuk'); sibuk(b, true, 'Membuka…');
+        FU.panggil('cek', [id, kc]).then(x => {
+          k.id = id; k.kunci = kc; S.cfg = FU.rapikan(x.cfg || S.cfg); S.terbit = JSON.stringify(S.cfg); S.info = x.info; S.buka = null;
+          ubah('awal', false); rTerbit(m); toast('Form dibuka');
+        }).catch(e => { sibuk(b, false); pesan('mMasuk', 'err', esc(e.message)); });
+      };
+      return;
+    }
+    // Sudah punya form
+    const L = linkForm(k.id), info = S.info || {};
+    m.innerHTML = `<h2>Uji coba & aktivasi</h2><p class="desc">Form Anda sudah online. Setiap perubahan desain diterbitkan dengan tombol di bawah — link &amp; QR tetap sama.</p>
+      <div class="card"><h3>🔗 Form Anda</h3>
+        <div class="hasil" style="text-align:left;padding:14px"><div class="url" style="margin:0 0 10px"><input class="in" readonly value="${esc(L)}" id="lnk"><button class="btn sec" id="cp">${IC.copy}Salin</button></div>
+        <div class="btnrow" style="justify-content:flex-start"><button class="btn pri" id="bTerbit">🚀 Terbitkan perubahan</button><a class="btn sec" href="${esc(L)}" target="_blank" rel="noopener">${IC.ext}Buka form</a>
+        <a class="btn sec" href="dashboard.html">📊 Dashboard</a><button class="btn ghost" id="bKunci">🔑 Lihat kunci klien</button></div><div id="mTerbit"></div></div></div>
+      <div id="hasil"></div>
+      <p class="hint" style="margin-top:8px">Bukan form Anda? <a href="#" id="bKeluar">Keluar dari form ini di perangkat ini</a>.</p>`;
+    $('cp').onclick = () => { $('lnk').select(); (navigator.clipboard ? navigator.clipboard.writeText(L) : Promise.reject()).catch(() => document.execCommand('copy')).finally(() => toast('Link disalin')); };
+    $('bKunci').onclick = () => tampilKunci(false);
+    $('bKeluar').onclick = e => { e.preventDefault(); tanyaYakin('Keluar dari form ini?', 'Desain tetap tersimpan di server. Untuk membuka lagi, gunakan link form dan kunci klien.', () => { S.kon = KON0(); S.terbit = ''; S.info = null; ubah(); rTerbit(m); }); };
     $('bTerbit').onclick = () => {
-      const id = syarat(); if (!id) return;
-      const cfg = FU.rapikan(S.cfg), b = $('bTerbit');
-      sibuk(b, true, 'Menerbitkan…'); pesan('mTerbit');
-      panggil(id, 'simpan', [k.kunci, cfg, linkForm(id)])
-        .then(() => panggil(id, 'cek', [k.kunci]).catch(() => ({})))
-        .then(info => { S.terbit = JSON.stringify(cfg); S.link = linkForm(id); S.sheetUrl = info.url || S.sheetUrl; if (info.lisensi) { S.lis = info.lisensi; S.email = info.email; } ubah(); rTerbit(m); toast(S.lis && S.lis.aktif ? '🎉 Form berhasil diterbitkan' : '🧪 Form uji coba siap dicoba'); setTimeout(() => $('hasil').scrollIntoView({ behavior: 'smooth' }), 100); })
-        .catch(e => { sibuk(b, false); pesan('mTerbit', 'err', pesanIzin(e.message)); });
+      const b = $('bTerbit'), cfg = FU.rapikan(S.cfg); sibuk(b, true, 'Menerbitkan…'); pesan('mTerbit');
+      FU.panggil('simpan', [k.id, k.kunci, cfg]).then(() => { S.terbit = JSON.stringify(cfg); ubah(); sibuk(b, false); toast('🎉 Perubahan diterbitkan'); })
+        .catch(e => { sibuk(b, false); pesan('mTerbit', 'err', esc(e.message)); });
     };
-    $('bMuat').onclick = () => {
-      const id = syarat(); if (!id) return;
-      const b = $('bMuat'); sibuk(b, true, 'Memuat…');
-      panggil(id, 'cek', [k.kunci]).then(info => {
-        sibuk(b, false); S.sheetUrl = info.url || ''; S.lis = info.lisensi || S.lis; S.email = info.email || S.email; ubah();
-        if (!info.cfg) return pesan('mTerbit', 'info', 'Sheet ini belum punya desain. Klik <b>Terbitkan form</b> untuk menyimpan desain saat ini.');
-        tanyaYakin('Ganti dengan desain dari Sheet?', 'Desain di editor akan diganti dengan desain yang tersimpan di "' + (info.nama || 'Google Sheet') + '".', () => {
-          S.cfg = FU.rapikan(info.cfg); S.terbit = JSON.stringify(S.cfg); S.link = linkForm(id); S.buka = null; ubah('awal', false); rTerbit(m); toast('Desain dimuat dari Google Sheet');
-        });
-      }).catch(e => { sibuk(b, false); pesan('mTerbit', 'err', esc(e.message)); });
-    };
-    if (S.terbit && S.link && FU.idDariUrl(k.url) && S.link === linkForm(FU.idDariUrl(k.url))) hasil();
+    hasil();
+    FU.panggil('cek', [k.id, k.kunci]).then(x => { S.info = x.info; simpanDraf(); hasil(); }).catch(() => {});
   }
-  async function hasil() {
-    const L = S.link, id = FU.idDariUrl(S.kon.url), info = S.lis || {};
-    const cek = await FU.cekLisensi(info.lisensi, id);
-    const dasar = `<div class="url"><input class="in" readonly value="${esc(L)}" id="lnk"><button class="btn sec" id="cp">${IC.copy}Salin</button></div>
-      <div class="btnrow"><a class="btn sec" href="${esc(L)}" target="_blank" rel="noopener">${IC.ext}Buka form</a>
-        <a class="btn sec" href="dashboard.html">📊 Dashboard ulasan</a>
-        ${S.sheetUrl ? `<a class="btn sec" href="${esc(S.sheetUrl)}" target="_blank" rel="noopener">🗂️ Google Sheet</a>` : ''}</div>`;
-    if (cek.sah) {
+  function tampilKunci(baru) {
+    $('mJudul').textContent = baru ? '🔑 Simpan kunci klien Anda' : '🔑 Kunci klien';
+    $('mPesan').innerHTML = `Kunci ini dipakai untuk membuka dashboard &amp; mengubah desain dari perangkat lain. <b>Simpan di tempat aman</b> (mis. catatan HP).<br><br>
+      <code style="font-size:16px;padding:6px 10px;display:inline-block">${esc(S.kon.kunci)}</code>`;
+    $('mBatal').textContent = 'Salin'; $('mOke').textContent = 'Sudah saya simpan';
+    $('modal').classList.add('show');
+    $('mOke').onclick = () => $('modal').classList.remove('show');
+    $('mBatal').onclick = () => { (navigator.clipboard ? navigator.clipboard.writeText(S.kon.kunci) : Promise.reject()).then(() => toast('Kunci disalin')).catch(() => {}); };
+  }
+  function hasil() {
+    if (!$('hasil')) return;
+    const L = linkForm(S.kon.id), info = S.info || {}, B = info.batas || FU.SITUS.batasUji;
+    if (info.aktif) {
       $('hasil').innerHTML = `<div class="hasil"><div style="font-size:34px">🎉</div><h3 style="font:600 17px Poppins">Form Anda sudah aktif!</h3>
-        <p class="hint">Lisensi aktif untuk <b>${esc(cek.data.e)}</b>${cek.data.x ? ' sampai ' + esc(cek.data.x) : ''}. Bagikan link atau cetak kode QR ini.</p>${dasar}
-        <div class="qrw"><canvas id="qr"></canvas><div class="btnrow"><button class="btn pri" id="dq">${IC.dl}Unduh kartu QR (PNG)</button></div></div></div>`;
+        <p class="hint">Lisensi ${info.lisensi ? 'untuk <b>' + esc(info.lisensi.e) + '</b>' : ''}${info.berlaku ? ' berlaku sampai <b>' + esc(info.berlaku) + '</b>' : ' berlaku selamanya'}. Ulasan masuk ke Google Sheet Anda.</p>
+        <div class="qrw"><canvas id="qr"></canvas><div class="btnrow"><button class="btn pri" id="dq">${IC.dl}Unduh kartu QR (PNG)</button>${info.sheetUrl ? `<a class="btn sec" href="${esc(info.sheetUrl)}" target="_blank" rel="noopener">🗂️ Google Sheet</a>` : ''}</div></div></div>`;
       kartuQR($('qr'), L);
       $('dq').onclick = () => { const a = document.createElement('a'); a.download = 'QR-ulasan-' + S.cfg.brand.nama.replace(/[^\w]+/g, '-').toLowerCase() + '.png'; a.href = $('qr').toDataURL('image/png'); a.click(); };
-    } else {
-      const j = Math.min(info.jumlah || 0, FU.SITUS.batasUji), B = FU.SITUS.batasUji;
-      const wa = FU.waAktivasi({ nama: FU.rapikan(S.cfg).brand.nama, email: S.email, id, perpanjang: cek.kedaluwarsa });
-      $('hasil').innerHTML = `<div class="hasil uji"><div style="font-size:34px">🧪</div><h3 style="font:600 17px Poppins">${cek.kedaluwarsa ? 'Lisensi sudah berakhir' : 'Form uji coba sudah aktif'}</h3>
-        <p class="hint">Bagikan link ini ke maksimal <b>${B} orang</b> untuk mencoba, lalu lihat hasilnya di dashboard.</p>
-        <div class="kuota"><div class="kb"><i style="width:${j / B * 100}%"></i></div><small>${j} dari ${B} ulasan uji coba terpakai</small></div>${dasar}
-        <div class="beli"><b>Suka dengan hasilnya?</b><p>Aktifkan form untuk ulasan <b>tanpa batas</b>, kartu QR siap cetak, dan tanpa tanda uji coba.</p>
-          <a class="btn wa" href="${esc(wa)}" target="_blank" rel="noopener">💳 ${cek.kedaluwarsa ? 'Perpanjang lisensi' : 'Buat form (aktifkan)'}</a>
-          <small>Pembayaran melalui WhatsApp admin itekno.id. Lisensi berlaku untuk 1 akun Gmail${S.email ? ': <b>' + esc(S.email) + '</b>' : ''}.<br>Sudah punya lisensi? Pasang di <a href="dashboard.html">dashboard</a>.</small></div></div>`;
+      return;
     }
-    $('cp').onclick = () => { $('lnk').select(); (navigator.clipboard ? navigator.clipboard.writeText(L) : Promise.reject()).catch(() => document.execCommand('copy')).finally(() => toast('Link disalin')); };
+    const j = Math.min(info.uji || 0, B);
+    const wa = FU.waAktivasi({ nama: FU.rapikan(S.cfg).brand.nama, email: S.kon.email || info.email, id: S.kon.id, perpanjang: info.kedaluwarsa });
+    $('hasil').innerHTML = `<div class="hasil uji"><div style="font-size:34px">🧪</div><h3 style="font:600 17px Poppins">${info.kedaluwarsa ? 'Lisensi sudah berakhir' : 'Mode uji coba'}</h3>
+      <p class="hint">Bagikan link form ke maksimal <b>${B} orang</b> untuk mencoba, lalu lihat hasilnya di dashboard.</p>
+      <div class="kuota"><div class="kb"><i style="width:${j / B * 100}%"></i></div><small>${j} dari ${B} ulasan uji coba terpakai</small></div>
+      <div class="beli"><b>Suka dengan hasilnya?</b><p>Aktifkan form untuk ulasan <b>tanpa batas</b>, data masuk ke Google Sheet Anda, kartu QR siap cetak, dan tanpa tanda uji coba.</p>
+        <a class="btn wa" href="${esc(wa)}" target="_blank" rel="noopener">💳 ${info.kedaluwarsa ? 'Perpanjang lisensi' : 'Buat form (aktifkan)'}</a>
+        <small>Pembayaran melalui WhatsApp admin itekno.id. Setelah menerima lisensi, aktifkan di <a href="dashboard.html">dashboard</a>.</small></div></div>`;
   }
   const kartuQR = (cv, url) => FU.kartuQR(cv, url, FU.rapikan(S.cfg));
 
   /* ================= Umum ================= */
   function toast(t, err) { const e = $('toast'); e.textContent = t; e.style.background = err ? '#c92a2a' : '#212529'; e.classList.add('show'); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove('show'), 2600); }
   function tanyaYakin(j, p, ok) {
-    $('mJudul').textContent = j; $('mPesan').textContent = p; $('modal').classList.add('show');
+    $('mJudul').textContent = j; $('mPesan').textContent = p; $('mBatal').textContent = 'Batal'; $('mOke').textContent = 'Ya, lanjutkan'; $('modal').classList.add('show');
     $('mOke').onclick = () => { $('modal').classList.remove('show'); ok(); };
     $('mBatal').onclick = () => $('modal').classList.remove('show');
   }

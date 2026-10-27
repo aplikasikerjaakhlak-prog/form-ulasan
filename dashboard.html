@@ -53,6 +53,9 @@
   .lis .kanan{border-left:1px dashed rgba(0,0,0,.12);padding-left:20px}
   .lis textarea{font-family:ui-monospace,monospace;font-size:12px;min-height:64px;resize:vertical;word-break:break-all}
   .qrw{display:flex;gap:14px;align-items:center}
+  .akt{margin:0 0 12px 18px;font-size:13px;color:#343a40} .akt li{margin-bottom:10px} .akt .in{margin-top:6px} .akt textarea{min-height:56px}
+  .perp{margin-top:14px;font-size:13px}.perp summary{cursor:pointer;color:var(--mut);font-weight:600}.perp textarea{margin-top:8px;min-height:56px}
+  .btn.kecil{padding:5px 10px;font-size:12px;margin-left:4px} .emailsrv{display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap} .emailsrv code{background:#fff;border:1px dashed #ced4da;border-radius:8px;padding:6px 10px;font-size:13px}
   .qrw canvas{width:120px;height:auto;border-radius:10px;box-shadow:0 8px 20px -12px rgba(0,0,0,.4)}
   /* Statistik */
   .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
@@ -99,68 +102,77 @@
   const $ = id => document.getElementById(id), esc = FU.esc;
   const DRAF = 'fu_builder_v1';
   let B = null; try { B = JSON.parse(localStorage.getItem(DRAF)); } catch (e) {}
-  B = B || { kon: { url: '', kunci: '', ingat: true } }; B.kon = B.kon || { url: '', kunci: '', ingat: true };
+  B = B || {}; B.kon = B.kon && B.kon.id !== undefined ? B.kon : { id: '', kunci: '', email: '', ingat: true };
+  // Link dashboard (…/dashboard.html?s=ID): isi otomatis ID form
+  const sQ = FU.idForm(location.search);
+  if (sQ && B.kon.id !== sQ) { B.kon = { id: sQ, kunci: '', email: '', ingat: true }; }
   let D = null, tampilN = 50, cari = '';
 
   function simpanB() { try { const d = JSON.parse(JSON.stringify(B)); if (!d.kon.ingat) d.kon.kunci = ''; localStorage.setItem(DRAF, JSON.stringify(d)); } catch (e) {} }
-  const id = () => FU.idDariUrl(B.kon.url);
-  function panggil(fn, args) {
-    return fetch(FU.urlApi(id()), { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn, args }) })
-      .then(r => r.json()).then(j => { if (!j.ok) throw new Error(j.error); return j.data; })
-      .catch(e => { throw /Failed to fetch|NetworkError|Load failed|JSON|Unexpected/i.test(e.message) ? new Error('Server tidak merespons. Periksa Web app URL & koneksi internet.') : e; });
-  }
+  const id = () => B.kon.id;
   function toast(t, err) { const e = $('toast'); e.textContent = t; e.style.background = err ? '#c92a2a' : '#212529'; e.classList.add('show'); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove('show'), 2600); }
+  const salin = (t, m) => (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => toast(m)).catch(() => toast('Salin manual: ' + t));
 
   /* ---------- Masuk ---------- */
   function login(pesan) {
+    const linkAwal = id() ? new URL('f/?s=' + id(), new URL('./', location.href)).href : '';
     $('isi').innerHTML = `<div class="card login"><h3 style="font-size:18px">📊 Masuk ke dashboard ulasan</h3>
-      <p style="color:var(--mut);margin-bottom:14px">Gunakan Web app URL dan kunci admin dari Google Sheet Anda (tab <b>Mulai</b>).</p>
-      <div class="f"><label>Web app URL</label><input class="in" id="lu" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(B.kon.url)}"></div>
-      <div class="f"><label>Kunci admin</label><input class="in" id="lk" placeholder="FU-XXXX-XXXX-XXXX" value="${esc(B.kon.kunci)}" style="font-family:ui-monospace,monospace;text-transform:uppercase"></div>
+      <p style="color:var(--mut);margin-bottom:14px">Gunakan <b>link form</b> Anda dan <b>kunci klien</b> (diberikan saat memulai uji coba, format FU-XXXX-XXXX-XXXX).</p>
+      <div class="f"><label>Link form</label><input class="in" id="lu" placeholder="…/form-ulasan/f/?s=xxxxxxxxxx" value="${esc(linkAwal)}"></div>
+      <div class="f"><label>Kunci klien</label><input class="in" id="lk" placeholder="FU-XXXX-XXXX-XXXX" value="${esc(B.kon.kunci)}" style="font-family:ui-monospace,monospace;text-transform:uppercase"></div>
       <button class="btn pri" id="lm" style="width:100%">Masuk</button>${pesan ? `<div class="msg err">${esc(pesan)}</div>` : ''}
-      <p style="color:var(--mut);font-size:12.5px;margin-top:14px">Belum punya form? <a href="buat.html">Buat form di sini</a>.</p></div>`;
-    $('lm').onclick = () => { B.kon.url = $('lu').value.trim(); B.kon.kunci = $('lk').value.trim().toUpperCase(); simpanB(); muat(); };
+      <p style="color:var(--mut);font-size:12.5px;margin-top:14px">Lupa kunci? Hubungi admin itekno.id. Belum punya form? <a href="buat.html">Buat form di sini</a>.</p></div>`;
+    $('lm').onclick = () => { const i = FU.idForm($('lu').value); if (!i) return login('Link form belum benar.'); B.kon.id = i; B.kon.kunci = $('lk').value.trim().toUpperCase(); simpanB(); muat(); };
     $('lk').onkeydown = e => { if (e.key === 'Enter') $('lm').click(); };
   }
 
   function muat() {
+    if (!FU.siapServer()) { $('isi').innerHTML = '<div class="msg err">Server belum diatur (apiUrl di assets/inti.js).</div>'; return; }
     if (!id() || !/^FU-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(B.kon.kunci || '')) return login('');
     $('isi').innerHTML = '<div class="kosong"><span class="spin dk" style="width:30px;height:30px"></span><p style="margin-top:12px">Memuat data ulasan…</p></div>';
-    Promise.all([panggil('data', [B.kon.kunci]), panggil('cek', [B.kon.kunci]).catch(() => ({}))])
-      .then(([d, c]) => { D = d; D.cfg = c.cfg ? FU.rapikan(c.cfg) : (B.cfg ? FU.rapikan(B.cfg) : null); B.lis = d.lisensi; B.email = d.email; simpanB(); gambar(); })
+    Promise.all([FU.panggil('data', [id(), B.kon.kunci]), FU.panggil('cek', [id(), B.kon.kunci]).catch(() => ({}))])
+      .then(([d, c]) => { D = d; D.cfg = c.cfg ? FU.rapikan(c.cfg) : (B.cfg ? FU.rapikan(B.cfg) : FU.rapikan({})); B.info = d.info; simpanB(); gambar(); })
       .catch(e => login(e.message));
   }
 
   /* ---------- Gambar dashboard ---------- */
-  async function gambar() {
-    const cfg = D.cfg || FU.rapikan({}), br = cfg.brand, link = new URL('f/?s=' + id(), new URL('./', location.href)).href;
-    const L = D.lisensi || {}, cek = await FU.cekLisensi(L.lisensi, id());
-    const aktif = L.aktif && cek.sah;
-    const kelas = aktif ? 'aktif' : (L.status && L.status !== 'uji') || (L.aktif && !cek.sah) ? 'mati' : 'uji';
-    const B_ = L.batas || FU.SITUS.batasUji, j = Math.min(L.jumlah || 0, B_);
-    const wa = FU.waAktivasi({ nama: br.nama, email: D.email, id: id(), perpanjang: kelas === 'mati' });
+  function gambar() {
+    const cfg = D.cfg, br = cfg.brand, I = D.info, link = new URL('f/?s=' + id(), new URL('./', location.href)).href;
+    const kelas = I.aktif ? 'aktif' : I.kedaluwarsa ? 'mati' : 'uji';
+    const B_ = I.batas || FU.SITUS.batasUji, j = Math.min(I.uji || 0, B_);
+    const wa = FU.waAktivasi({ nama: br.nama, email: I.email || B.kon.email, id: id(), perpanjang: kelas === 'mati' });
     let kiri;
     if (kelas === 'aktif') {
-      const sisa = L.data.x ? Math.ceil((new Date(L.data.x) - new Date(FU.hariIni())) / 864e5) : null;
+      const sisa = I.berlaku ? Math.ceil((new Date(I.berlaku) - new Date(FU.hariIni())) / 864e5) : null;
       kiri = `<span class="badge">✅ FORM AKTIF</span><h2>Ulasan tanpa batas</h2>
-        <p>Lisensi untuk <b>${esc(L.data.e)}</b> · ${L.data.x ? `berlaku sampai <b>${esc(L.data.x)}</b> (${sisa} hari lagi)` : 'berlaku <b>selamanya</b>'}</p>
+        <p>Lisensi untuk <b>${esc(I.lisensi ? I.lisensi.e : I.email)}</b> · ${I.berlaku ? `berlaku sampai <b>${esc(I.berlaku)}</b> (${sisa} hari lagi)` : 'berlaku <b>selamanya</b>'}</p>
+        <p style="margin-top:8px">Ulasan masuk ke ${I.sheetUrl ? `<a href="${esc(I.sheetUrl)}" target="_blank" rel="noopener">Google Sheet Anda</a>` : 'Google Sheet Anda'}.</p>
         ${sisa !== null && sisa <= 14 ? `<p style="margin-top:10px"><a class="btn wa" href="${esc(wa)}" target="_blank" rel="noopener">🔄 Perpanjang lisensi</a></p>` : ''}`;
     } else if (kelas === 'mati') {
-      kiri = `<span class="badge">⛔ LISENSI TIDAK BERLAKU</span><h2>${L.status === 'kedaluwarsa' ? 'Lisensi sudah berakhir' : 'Lisensi perlu diperbarui'}</h2>
-        <p>${esc(L.alasan || cek.alasan || '')}. Form kembali ke mode uji coba (${j}/${B_} ulasan terpakai).</p>
-        <p style="margin-top:12px"><a class="btn wa" href="${esc(wa)}" target="_blank" rel="noopener">💳 Hubungi admin untuk lisensi</a></p>`;
+      kiri = `<span class="badge">⛔ LISENSI BERAKHIR</span><h2>Lisensi berakhir ${esc(I.berlaku)}</h2>
+        <p>Form tidak menerima ulasan baru sampai lisensi diperpanjang. Data lama tetap aman di Google Sheet Anda.</p>
+        <p style="margin-top:12px"><a class="btn wa" href="${esc(wa)}" target="_blank" rel="noopener">🔄 Perpanjang lisensi</a></p>`;
     } else {
       kiri = `<span class="badge">🧪 MODE UJI COBA</span><h2>${j >= B_ ? 'Kuota uji coba sudah habis' : `Sisa ${B_ - j} dari ${B_} ulasan uji coba`}</h2>
         <p>${j >= B_ ? 'Form tidak menerima ulasan baru sampai diaktifkan.' : 'Bagikan link form ke maksimal ' + B_ + ' orang untuk mencoba.'}</p>
         <div class="kb"><i style="width:0" data-w="${j / B_ * 100}%"></i></div><small style="color:var(--mut)">${j}/${B_} terpakai</small>
-        <div style="margin-top:16px"><b style="font-family:Poppins">Suka dengan hasilnya?</b><p style="margin:2px 0 12px;color:var(--mut)">Aktifkan form: ulasan tanpa batas, kartu QR siap cetak, tanpa tanda uji coba.</p>
+        <div style="margin-top:16px"><b style="font-family:Poppins">Suka dengan hasilnya?</b><p style="margin:2px 0 12px;color:var(--mut)">Aktifkan form: ulasan tanpa batas, data masuk ke Google Sheet Anda, kartu QR siap cetak.</p>
         <a class="btn wa" href="${esc(wa)}" target="_blank" rel="noopener">💳 Buat form (aktifkan)</a>
-        <p style="font-size:12px;color:var(--mut);margin-top:8px">Pembayaran melalui WhatsApp admin itekno.id · 1 lisensi untuk 1 akun Gmail${D.email ? ' (<b>' + esc(D.email) + '</b>)' : ''}</p></div>`;
+        <p style="font-size:12px;color:var(--mut);margin-top:8px">Pembayaran melalui WhatsApp admin itekno.id · 1 lisensi untuk 1 akun Gmail</p></div>`;
     }
-    const kanan = aktif
-      ? `<h3>Kartu QR</h3><div class="qrw"><canvas id="qr"></canvas><div><p style="color:var(--mut);font-size:13px;margin-bottom:10px">Cetak di meja kasir, struk, atau stiker.</p><button class="btn pri" id="dq">⬇ Unduh PNG</button></div></div>`
-      : `<h3>🔑 Pasang lisensi</h3><p style="color:var(--mut);font-size:13px;margin-bottom:8px">Setelah pembayaran, admin mengirim lisensi lewat WhatsApp. Tempel di sini.</p>
-        <textarea class="in" id="lisIn" placeholder="FUL1.…"></textarea><button class="btn pri" id="lisBtn" style="margin-top:10px;width:100%">Pasang lisensi</button><div id="lisMsg"></div>`;
+    const es = I.emailServer || '(email server)';
+    const kanan = I.aktif
+      ? `<h3>Kartu QR</h3><div class="qrw"><canvas id="qr"></canvas><div><p style="color:var(--mut);font-size:13px;margin-bottom:10px">Cetak di meja kasir, struk, atau stiker.</p><button class="btn pri" id="dq">⬇ Unduh PNG</button></div></div>
+        <details class="perp"><summary>🔄 Pasang lisensi perpanjangan</summary><textarea class="in" id="lisIn" placeholder="FUL1.…"></textarea>
+        <button class="btn pri" id="lisBtn" style="width:100%;margin-top:8px">Pasang lisensi</button><div id="lisMsg"></div></details>`
+      : `<h3>🔑 Aktifkan form</h3>
+        <ol class="akt">
+          <li><b>Buat Google Sheet</b> dengan akun Gmail yang tertulis di lisensi. <a class="btn sec kecil" href="https://sheets.new" target="_blank" rel="noopener">＋ Buat Google Sheet baru</a></li>
+          <li><b>Bagikan</b> Sheet itu ke email berikut sebagai <b>Editor</b>:<div class="emailsrv"><code>${esc(es)}</code><button class="btn sec kecil" id="cpEs">Salin</button></div></li>
+          <li><b>Tempel link Google Sheet</b>:<input class="in" id="shIn" placeholder="https://docs.google.com/spreadsheets/d/…" value="${esc(I.sheetUrl || '')}"></li>
+          <li><b>Tempel lisensi</b> dari admin:<textarea class="in" id="lisIn" placeholder="FUL1.…"></textarea></li>
+        </ol>
+        <button class="btn pri" id="lisBtn" style="width:100%">Aktifkan form</button><div id="lisMsg"></div>`;
 
     // statistik
     const H = D.header, R = D.rows, iK = H.indexOf('Kategori'), iR = H.indexOf('Rata-rata'), iW = H.indexOf('Waktu');
@@ -173,9 +185,10 @@
 
     $('isi').innerHTML = `
       <div class="kepala"><div class="lb">${br.logo ? `<img src="${esc(br.logo)}" alt="">` : esc(br.ikon)}</div>
-        <div><h1>${esc(br.nama)}</h1><small>Dashboard ulasan · ${esc(D.nama || '')}</small></div>
+        <div><h1>${esc(br.nama)}</h1><small>Dashboard ulasan · ID ${esc(id())}</small></div>
         <div class="aksi"><a class="btn sec" href="${esc(link)}" target="_blank" rel="noopener">↗ Buka form</a><button class="btn sec" id="salin">🔗 Salin link</button>
-          ${D.url ? `<a class="btn sec" href="${esc(D.url)}" target="_blank" rel="noopener">🗂️ Google Sheet</a>` : ''}<button class="btn sec" id="muatUlang">↻ Muat ulang</button></div></div>
+          ${I.sheetUrl ? `<a class="btn sec" href="${esc(I.sheetUrl)}" target="_blank" rel="noopener">🗂️ Google Sheet</a>` : ''}<button class="btn sec" id="muatUlang">↻ Muat ulang</button></div></div>
+      ${D.catatan ? `<div class="msg err" style="margin-bottom:14px">${esc(D.catatan)}</div>` : ''}
       <div class="card lis ${kelas}"><div>${kiri}</div><div class="kanan">${kanan}</div></div>
       <div class="stats">
         <div class="st"><small>Total ulasan</small><b>${D.total}</b><span>${minggu} dalam 7 hari terakhir</span></div>
@@ -190,22 +203,27 @@
           `<div class="bar"><span class="t" title="${esc(x.h)}">${esc(x.h)}</span><span class="tr"><i style="background:var(--a)" data-w="${x.avg / x.maks * 100}%"></i></span><b>${x.avg.toFixed(1)}</b></div>`).join('') : '<p style="color:var(--mut)">Belum ada data penilaian.</p>'}</div>
       </div>
       <div class="card"><div class="tbar"><h3 style="margin:0;flex:1">Daftar ulasan <small style="font-weight:400;color:var(--mut)">(terbaru di atas)</small></h3>
-        <input class="in" id="cari" placeholder="🔍 Cari nama, saran…" value="${esc(cari)}"><button class="btn sec" id="csv">⬇ Ekspor CSV</button></div><div id="tabel"></div></div>`;
+        <input class="in" id="cari" placeholder="🔍 Cari nama, saran…" value="${esc(cari)}"><button class="btn sec" id="csv">⬇ Ekspor CSV</button></div><div id="tabel"></div></div>
+      <p style="text-align:center;color:var(--mut);font-size:12.5px"><a href="#" id="keluar">Keluar dari dashboard di perangkat ini</a></p>`;
 
     requestAnimationFrame(() => setTimeout(() => document.querySelectorAll('[data-w]').forEach(i => i.style.width = i.dataset.w), 60));
     $('muatUlang').onclick = muat;
-    $('salin').onclick = () => navigator.clipboard.writeText(link).then(() => toast('Link form disalin'));
-    if (aktif) { FU.kartuQR($('qr'), link, cfg); $('dq').onclick = () => { const a = document.createElement('a'); a.download = 'QR-ulasan.png'; a.href = $('qr').toDataURL('image/png'); a.click(); }; }
-    else $('lisBtn').onclick = () => {
-      const v = $('lisIn').value.replace(/\s+/g, ''), b = $('lisBtn');
-      if (!v) return;
-      b.disabled = true; b.innerHTML = '<span class="spin"></span> Memeriksa…';
-      FU.cekLisensi(v, id()).then(c => {
-        if (!c.sah) throw new Error(c.alasan);
-        return panggil('pasangLisensi', [B.kon.kunci, v]);
-      }).then(() => { toast('🎉 Lisensi terpasang. Form aktif!'); muat(); })
-        .catch(e => { b.disabled = false; b.textContent = 'Pasang lisensi'; $('lisMsg').innerHTML = `<div class="msg err">${esc(e.message)}</div>`; });
-    };
+    $('salin').onclick = () => salin(link, 'Link form disalin');
+    $('keluar').onclick = e => { e.preventDefault(); B.kon = { id: '', kunci: '', email: '', ingat: true }; B.terbit = ''; B.info = null; simpanB(); login(''); };
+    if (I.aktif) { FU.kartuQR($('qr'), link, cfg); $('dq').onclick = () => { const a = document.createElement('a'); a.download = 'QR-ulasan.png'; a.href = $('qr').toDataURL('image/png'); a.click(); }; }
+    else $('cpEs').onclick = () => salin(es, 'Email server disalin');
+    {
+      const label = $('lisBtn').textContent;
+      $('lisBtn').onclick = () => {
+        const v = $('lisIn').value.replace(/\s+/g, ''), u = $('shIn') ? $('shIn').value.trim() : '', b = $('lisBtn');
+        if (!/docs\.google\.com\/spreadsheets\/d\//.test(u) && !I.sheetUrl) return $('lisMsg').innerHTML = '<div class="msg err">Tempel link Google Sheet Anda (langkah 3).</div>';
+        if (!/^FUL1\./.test(v)) return $('lisMsg').innerHTML = '<div class="msg err">Tempel lisensi lengkap yang diawali FUL1. (langkah 4).</div>';
+        b.disabled = true; b.innerHTML = '<span class="spin"></span> Mengaktifkan…';
+        FU.panggil('aktifkan', [id(), B.kon.kunci, v, u])
+          .then(() => { toast(I.aktif ? '🎉 Lisensi baru terpasang' : '🎉 Form aktif! Ulasan kini masuk ke Google Sheet Anda.'); muat(); })
+          .catch(e => { b.disabled = false; b.textContent = label; $('lisMsg').innerHTML = `<div class="msg err">${esc(e.message)}</div>`; });
+      };
+    }
     $('cari').oninput = e => { cari = e.target.value; tampilN = 50; tabel(); };
     $('csv').onclick = ekspor;
     tabel();
