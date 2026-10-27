@@ -570,6 +570,12 @@
       .catch(e => { throw /Failed to fetch|NetworkError|Load failed|JSON|Unexpected token|HTTP/i.test(e.message)
         ? new Error('Server tidak merespons. Pastikan URL benar dan saat Deploy "Who has access" = Anyone.') : e; });
   }
+  // Pesan ramah jika script di Sheet klien belum diberi izin akses
+  function pesanIzin(e) {
+    return /izin|permission|authoriz/i.test(e || '')
+      ? '<b>Script belum diizinkan.</b> Di Sheet salinan buka <b>Ekstensi → Apps Script</b>, pilih fungsi <code>izinkanAkses</code> (atau <code>doGet</code>) di toolbar → klik <b>▶ Jalankan</b> → <b>Tinjau izin</b> → pilih akun → <b>Lanjutan → Buka … (tidak aman)</b> → <b>Izinkan</b>. Setelah itu tempel ulang URL di atas.'
+      : esc(e);
+  }
   function rTerbit(m) {
     const k = S.kon, id = FU.idDariUrl(k.url), tmpl = FU.SITUS.templateSheetId;
     const urlSalin = 'https://docs.google.com/spreadsheets/d/' + tmpl + '/copy';
@@ -584,7 +590,7 @@
         <ol><li>Di Sheet salinan: menu <b>Ekstensi → Apps Script</b>.</li>
           <li>Klik tombol biru <b>Deploy → New deployment</b>, pilih jenis ⚙️ <b>Web app</b>.</li>
           <li>Execute as: <b>Me</b> · Who has access: <b>Anyone</b> → <b>Deploy</b>.</li>
-          <li>Klik <b>Authorize access</b>, pilih akun Anda. Jika muncul "Google hasn't verified this app": klik <b>Advanced → Go to … (unsafe)</b> → <b>Allow</b>. (Aman — script berjalan di akun Anda sendiri.)</li>
+          <li>Klik <b>Authorize access</b> (Izinkan akses), pilih akun Anda. Jika muncul "Google hasn't verified this app": klik <b>Advanced → Go to … (unsafe)</b> → <b>Allow</b>. (Aman — script berjalan di akun Anda sendiri.)</li>
           <li>Salin <b>Web app URL</b> dan tempel di bawah.</li></ol>
         <div class="f"><input class="in" id="kUrl" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(k.url)}"></div>
         <div id="mUrl"></div></div></div>
@@ -607,7 +613,7 @@
       const id0 = FU.idDariUrl(k.url);
       fetch(FU.urlApi(id0) + '?api=ping', { redirect: 'follow' }).then(r => r.json()).then(j => {
         if (FU.idDariUrl(k.url) !== id0) return;
-        j.ok ? pesan('mUrl', 'ok', '✓ Terhubung ke Google Sheet Anda. Lanjut ke langkah 3.') : pesan('mUrl', 'err', esc(j.error));
+        j.ok ? pesan('mUrl', 'ok', '✓ Terhubung ke Google Sheet Anda. Lanjut ke langkah 3.') : pesan('mUrl', 'err', pesanIzin(j.error));
       }).catch(() => { if (FU.idDariUrl(k.url) === id0) pesan('mUrl', 'err', 'Belum terhubung. Pastikan URL benar dan saat Deploy "Who has access" = <b>Anyone</b>.'); });
     }
     let tCek; $('kUrl').addEventListener('input', () => { clearTimeout(tCek); tCek = setTimeout(cekUrl, 500); });
@@ -626,7 +632,7 @@
       panggil(id, 'simpan', [k.kunci, cfg, linkForm(id)])
         .then(() => panggil(id, 'cek', [k.kunci]).catch(() => ({})))
         .then(info => { S.terbit = JSON.stringify(cfg); S.link = linkForm(id); S.sheetUrl = info.url || S.sheetUrl; if (info.lisensi) { S.lis = info.lisensi; S.email = info.email; } ubah(); rTerbit(m); toast(S.lis && S.lis.aktif ? '🎉 Form berhasil diterbitkan' : '🧪 Form uji coba siap dicoba'); setTimeout(() => $('hasil').scrollIntoView({ behavior: 'smooth' }), 100); })
-        .catch(e => { sibuk(b, false); pesan('mTerbit', 'err', esc(e.message)); });
+        .catch(e => { sibuk(b, false); pesan('mTerbit', 'err', pesanIzin(e.message)); });
     };
     $('bMuat').onclick = () => {
       const id = syarat(); if (!id) return;
