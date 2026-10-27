@@ -326,7 +326,7 @@
       'Nama usaha: ' + (o.nama || '-'), 'Email Gmail: ' + (o.email || '-'), 'ID form: ' + (o.id || '-'), '', 'Mohon info harga & cara pembayarannya. Terima kasih.'].join('\n');
     return linkWa(SITUS.adminWa, t);
   }
-  // HP: buka aplikasi WhatsApp. Komputer: langsung ke chat di WhatsApp Web (tanpa halaman perantara wa.me).
+  // HP: buka aplikasi WhatsApp. Komputer: aplikasi WhatsApp Desktop (lihat penangan klik di bawah), cadangan WhatsApp Web.
   function linkWa(no, teks) {
     no = String(no || '').replace(/\D/g, '').replace(/^0/, '62');
     const hp = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
@@ -361,6 +361,30 @@
   }
   function rrect(x, a, b, w, h, r) { x.beginPath(); x.moveTo(a + r, b); x.arcTo(a + w, b, a + w, b + h, r); x.arcTo(a + w, b + h, a, b + h, r); x.arcTo(a, b + h, a, b, r); x.arcTo(a, b, a + w, b, r); x.closePath(); }
 
+
+
+  // Komputer: tombol WhatsApp membuka aplikasi WhatsApp Desktop (whatsapp://), dengan cadangan WhatsApp Web.
+  if (typeof document !== 'undefined' && !W.__waApp) {
+    W.__waApp = true;
+    document.addEventListener('click', e => {
+      const a = e.target.closest && e.target.closest('a[href^="https://web.whatsapp.com/send"]');
+      if (!a || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      e.preventDefault();
+      const web = a.href, app = 'whatsapp://send' + web.slice(web.indexOf('?'));
+      let bar = document.getElementById('waBar');
+      if (!bar) {
+        bar = document.createElement('div'); bar.id = 'waBar';
+        bar.style.cssText = 'position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:99999;background:#1f2937;color:#fff;padding:12px 16px;border-radius:12px;font:14px/1.4 Inter,system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.25);display:flex;gap:12px;align-items:center;max-width:calc(100% - 32px);flex-wrap:wrap';
+        document.body.appendChild(bar);
+      }
+      bar.innerHTML = '<span>Membuka aplikasi WhatsApp… Tidak terbuka?</span><a target="_blank" rel="noopener" style="color:#25d366;font-weight:700;text-decoration:none">Pakai WhatsApp Web ›</a><button type="button" aria-label="Tutup" style="background:none;border:0;color:#9ca3af;font-size:18px;cursor:pointer;padding:0 2px">×</button>';
+      bar.querySelector('a').href = web;
+      bar.querySelector('a').onclick = () => { bar.remove(); };
+      bar.querySelector('button').onclick = () => bar.remove();
+      clearTimeout(bar._t); bar._t = setTimeout(() => bar.remove(), 12000);
+      location.href = app;
+    });
+  }
 
   W.FU = { SITUS, kartuQR, idForm, panggil, ambilConfig, siapServer, waAktivasi, linkWa, hariIni, FONT, LATAR, SUDUT, WARNA_CEPAT, TIPE, LABEL_BINTANG, EMOJI, MAKS_PERTANYAAN, TEMPLATE, SELESAI_DASAR,
            cfgBaru, rapikan, rapikanQ, pertanyaanBaru, skor, palet, campur, esc, amanUrl, amanGambar };
