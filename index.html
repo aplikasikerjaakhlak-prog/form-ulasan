@@ -44,6 +44,15 @@
   h1 em{font-style:normal;background:linear-gradient(90deg,var(--a),#f76707);-webkit-background-clip:text;background-clip:text;color:transparent}
   .lead{font-size:18px;color:var(--mut);max-width:540px}
   .cta{display:flex;gap:12px;flex-wrap:wrap;margin:28px 0 22px}
+  .unduh{display:inline-flex;align-items:center;gap:6px;margin:-8px 0 18px;font-weight:600;font-size:14px;color:var(--a,#d71920);text-decoration:none;border-bottom:1.5px dashed currentColor;padding-bottom:1px}
+  .unduh:hover{opacity:.8}
+  .pdfkartu{display:flex;align-items:center;gap:16px;margin-top:26px;padding:18px 20px;border:1.5px dashed var(--line);border-radius:16px;background:#fafbfc}
+  .pdfkartu .ik{font-size:30px;line-height:1}
+  .pdfkartu>div:nth-child(2){flex:1;min-width:0}
+  .pdfkartu b{font-size:15px} .pdfkartu p{margin:2px 0 0;color:var(--mut);font-size:13.5px}
+  @media(max-width:600px){.pdfkartu{flex-wrap:wrap}.pdfkartu .btn{width:100%;justify-content:center}}
+  .catpdf{text-align:center;margin-top:18px;color:var(--mut);font-size:14px} .catpdf a{color:var(--a,#d71920);font-weight:600}
+  details a{color:var(--a,#d71920);font-weight:600}
   .cek{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px;color:var(--mut)}
   .cek span::before{content:"✓";color:#2b8a3e;font-weight:700;margin-right:6px}
   .demo{position:relative;display:flex;flex-direction:column;align-items:center}
@@ -139,7 +148,7 @@
 <body>
 <header id="hd"><div class="w">
   <a class="lg" href="./"><i>⭐</i><div><b>Form Ulasan</b><small>by itekno.id</small></div></a>
-  <nav><a href="#fitur">Fitur</a><a href="#cara">Cara kerja</a><a href="#template">Template</a><a href="#harga">Harga</a><a href="#faq">FAQ</a><a class="btn pri" href="buat.html">Coba gratis</a></nav>
+  <nav><a href="#fitur">Fitur</a><a href="#cara">Cara kerja</a><a href="#template">Template</a><a href="#harga">Harga</a><a href="#faq">FAQ</a><a class="btn pri" href="buat">Coba gratis</a></nav>
 </div></header>
 
 <section class="hero"><div class="w">
@@ -147,7 +156,8 @@
     <span class="tag">✨ <b>Coba gratis</b> · Tanpa coding · Data di Google Sheet Anda</span>
     <h1>Form ulasan <em>sesuai merek</em> usaha Anda</h1>
     <p class="lead">Desain sendiri tampilan, warna, logo, dan pertanyaannya. Ulasan pelanggan langsung masuk ke <b>Google Sheet di Drive Anda</b> — bukan ke server orang lain.</p>
-    <div class="cta"><a class="btn pri" href="buat.html">Coba gratis sekarang →</a><a class="btn sec" href="#template">Lihat contoh</a></div>
+    <div class="cta"><a class="btn pri" href="buat">Coba gratis sekarang →</a><a class="btn sec" href="#template">Lihat contoh</a></div>
+    <a class="unduh" href="panduan-berlangganan.pdf" download="Cara-Berlangganan-Form-Ulasan-itekno.pdf">📄 Unduh panduan berlangganan (PDF)</a>
     <div class="cek"><span>Uji coba 3 ulasan sungguhan</span><span>Kode QR siap cetak</span><span>Nyaman di HP</span></div>
   </div>
   <div class="demo">
@@ -177,6 +187,8 @@
     <div class="lk rv"><h3>Uji coba gratis</h3><p>Satu klik, form langsung online. Bagikan ke 3 orang dan lihat hasil ulasannya di dashboard.</p><span class="dur">3 ulasan gratis</span></div>
     <div class="lk rv"><h3>Aktifkan form</h3><p>Suka hasilnya? Bayar via WhatsApp, hubungkan Google Sheet Anda, tempel lisensi. Ulasan tanpa batas.</p><span class="dur">Langsung aktif</span></div>
   </div>
+  <div class="pdfkartu rv"><div class="ik">📄</div><div><b>Panduan berlangganan lengkap</b><p>5 langkah dari desain sampai form aktif, lengkap dengan gambar. PDF · 8 halaman.</p></div>
+    <a class="btn sec" href="panduan-berlangganan.pdf" download="Cara-Berlangganan-Form-Ulasan-itekno.pdf">⬇ Unduh PDF</a></div>
 </div></section>
 
 <section id="template"><div class="w">
@@ -204,33 +216,35 @@
 <section id="harga" style="padding-top:20px"><div class="w">
   <div class="sh rv"><div class="k">Harga</div><h2>Satu lisensi, ulasan tanpa batas</h2><p>Coba gratis dulu dengan 3 ulasan sungguhan. Aktifkan jika cocok.</p></div>
   <div class="harga rv">
-    <div class="pk"><span class="lb2">Uji coba</span><h3>Gratis</h3><ul><li>Semua fitur desain & template</li><li>Data masuk ke Google Sheet Anda</li><li>Dashboard ulasan</li><li class="no">Maksimal 3 ulasan</li><li class="no">Tanda "Mode uji coba"</li></ul><a class="btn sec" href="buat.html">Mulai uji coba</a></div>
+    <div class="pk"><span class="lb2">Uji coba</span><h3>Gratis</h3><ul><li>Semua fitur desain & template</li><li>Data masuk ke Google Sheet Anda</li><li>Dashboard ulasan</li><li class="no">Maksimal 3 ulasan</li><li class="no">Tanda "Mode uji coba"</li></ul><a class="btn sec" href="buat">Mulai uji coba</a></div>
     <div class="pk utama"><span class="lb2">Lisensi</span><h3>Hubungi admin</h3><ul><li>Ulasan <b>tanpa batas</b></li><li>Kartu QR bermerek siap cetak</li><li>Tanpa tanda uji coba & watermark</li><li>Ubah desain kapan saja</li><li>1 lisensi untuk 1 akun Gmail</li></ul><a class="btn pri" id="waHarga" href="#" target="_blank" rel="noopener">💬 Tanya harga via WhatsApp</a></div>
   </div>
+  <p class="catpdf rv">Ingin tahu langkah-langkahnya dulu? <a href="panduan-berlangganan.pdf" download="Cara-Berlangganan-Form-Ulasan-itekno.pdf">Unduh panduan berlangganan (PDF)</a>.</p>
 </div></section>
 
 <section id="faq"><div class="w">
   <div class="sh rv"><div class="k">FAQ</div><h2>Pertanyaan yang sering diajukan</h2></div>
   <div class="faq">
-    <details><summary>Apa itu mode uji coba?</summary><p>Setelah form dihubungkan ke Google Sheet Anda, form bisa langsung diisi oleh maksimal 3 orang. Anda bisa melihat hasilnya di dashboard sebelum memutuskan membeli lisensi.</p></details>
+    <details><summary>Apa itu mode uji coba?</summary><p>Dengan satu klik "Mulai uji coba", form Anda langsung online dan bisa diisi oleh maksimal 3 orang. Lihat hasilnya di dashboard sebelum memutuskan membeli lisensi.</p></details>
     <details><summary>Bagaimana cara membeli lisensi?</summary><p>Klik "Buat form (aktifkan)" di builder atau dashboard. Anda akan diarahkan ke WhatsApp admin itekno.id dengan data form yang sudah terisi. Setelah pembayaran, admin mengirim lisensi untuk dipasang di dashboard.</p></details>
     <details><summary>Satu lisensi untuk berapa akun?</summary><p>Satu lisensi berlaku untuk satu akun Gmail (pemilik Google Sheet) dan satu form. Untuk cabang lain dengan akun berbeda, diperlukan lisensi terpisah.</p></details>
     <details><summary>Di mana data ulasan disimpan?</summary><p>Setelah form aktif, ulasan ditulis ke Google Sheet milik Anda. Server itekno.id hanya meneruskan ulasan ke Sheet tersebut (karena itu Sheet dibagikan ke email server sebagai Editor). Selama uji coba, maksimal 3 ulasan ditampung sementara di server lalu dipindahkan ke Sheet Anda saat aktivasi.</p></details>
     <details><summary>Apakah perlu keahlian teknis?</summary><p>Tidak. Anda cukup mendesain form, lalu saat aktivasi membuat satu Google Sheet kosong dan membagikannya ke email server kami. Tidak ada script, deploy, atau izin aplikasi yang perlu diatur.</p></details>
+    <details><summary>Ada panduan langkah-langkahnya?</summary><p>Ada. <a href="panduan-berlangganan.pdf" download="Cara-Berlangganan-Form-Ulasan-itekno.pdf">Unduh panduan berlangganan (PDF)</a> — berisi 5 langkah dari desain, uji coba, berlangganan, aktivasi, sampai pemakaian sehari-hari.</p></details>
     <details><summary>Apakah perlu hosting atau server?</summary><p>Tidak. Tampilan form disediakan oleh itekno.id, sedangkan penyimpanan memakai Google Sheet Anda.</p></details>
     <details><summary>Bisakah form diubah setelah diterbitkan?</summary><p>Bisa kapan saja. Buka builder, ubah desain, lalu klik "Terbitkan perubahan". Link dan kode QR tetap sama.</p></details>
-    <details><summary>Bisa dipakai untuk beberapa cabang?</summary><p>Bisa. Buat satu salinan Sheet untuk tiap cabang agar datanya terpisah, atau pakai satu form dengan pertanyaan pilihan "Cabang".</p></details>
+    <details><summary>Bisa dipakai untuk beberapa cabang?</summary><p>Bisa. Buat satu form dan satu lisensi untuk tiap cabang agar datanya terpisah, atau pakai satu form dengan pertanyaan pilihan "Cabang".</p></details>
   </div>
 </div></section>
 
 <section style="padding-top:20px"><div class="w"><div class="akhir rv">
   <h2>Mulai dengarkan pelanggan Anda hari ini</h2><p>Desain form ulasan bermerek dalam 5 menit dan coba gratis dengan 3 ulasan.</p>
-  <a class="btn" href="buat.html">Buat form sekarang →</a>
+  <a class="btn" href="buat">Buat form sekarang →</a>
 </div></div></section>
 
 <footer><div class="w"><span>© 2026 <b>itekno.id</b> — Form Ulasan</span><span>Data ulasan tersimpan di Google Sheet milik masing-masing pengguna.</span></div></footer>
 
-<script src="assets/inti.js"></script>
+<script src="assets/inti.js?v=20261027b"></script>
 <script>
   const T = FU.TEMPLATE, keys = Object.keys(T).filter(k => k !== 'kosong');
   const demo = document.getElementById('demo'), ganti = document.getElementById('ganti');

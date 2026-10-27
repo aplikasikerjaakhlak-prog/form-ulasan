@@ -89,13 +89,13 @@
 <header class="top">
   <a class="lg" href="./"><i>⭐</i><div><b>Form Ulasan</b><small>Dashboard</small></div></a>
   <div class="sp"></div>
-  <a class="btn sec" href="buat.html">✏️ Edit desain</a>
+  <a class="btn sec" href="buat">✏️ Edit desain</a>
 </header>
 <main class="w" id="isi"></main>
 <div class="toast" id="toast"></div>
 
-<script src="assets/inti.js"></script>
-<script src="assets/qrcode.js"></script>
+<script src="assets/inti.js?v=20261027b"></script>
+<script src="assets/qrcode.js?v=20261027b"></script>
 <script>
 (function () {
   'use strict';
@@ -103,7 +103,7 @@
   const DRAF = 'fu_builder_v1';
   let B = null; try { B = JSON.parse(localStorage.getItem(DRAF)); } catch (e) {}
   B = B || {}; B.kon = B.kon && B.kon.id !== undefined ? B.kon : { id: '', kunci: '', email: '', ingat: true };
-  // Link dashboard (…/dashboard.html?s=ID): isi otomatis ID form
+  // Link dashboard (…/dashboard?s=kode): isi otomatis kode form
   const sQ = FU.idForm(location.search);
   if (sQ && B.kon.id !== sQ) { B.kon = { id: sQ, kunci: '', email: '', ingat: true }; }
   let D = null, tampilN = 50, cari = '';
@@ -115,13 +115,13 @@
 
   /* ---------- Masuk ---------- */
   function login(pesan) {
-    const linkAwal = id() ? new URL('f/?s=' + id(), new URL('./', location.href)).href : '';
+    const linkAwal = id() ? FU.linkForm((B.info && B.info.id === id() && B.info.slug) || id()) : '';
     $('isi').innerHTML = `<div class="card login"><h3 style="font-size:18px">📊 Masuk ke dashboard ulasan</h3>
       <p style="color:var(--mut);margin-bottom:14px">Gunakan <b>link form</b> Anda dan <b>kunci klien</b> (diberikan saat memulai uji coba, format FU-XXXX-XXXX-XXXX).</p>
-      <div class="f"><label>Link form</label><input class="in" id="lu" placeholder="…/form-ulasan/f/?s=xxxxxxxxxx" value="${esc(linkAwal)}"></div>
+      <div class="f"><label>Link form</label><input class="in" id="lu" placeholder="…/form-ulasan/nama-usaha-anda" value="${esc(linkAwal)}"></div>
       <div class="f"><label>Kunci klien</label><input class="in" id="lk" placeholder="FU-XXXX-XXXX-XXXX" value="${esc(B.kon.kunci)}" style="font-family:ui-monospace,monospace;text-transform:uppercase"></div>
       <button class="btn pri" id="lm" style="width:100%">Masuk</button>${pesan ? `<div class="msg err">${esc(pesan)}</div>` : ''}
-      <p style="color:var(--mut);font-size:12.5px;margin-top:14px">Lupa kunci? Hubungi admin itekno.id. Belum punya form? <a href="buat.html">Buat form di sini</a>.</p></div>`;
+      <p style="color:var(--mut);font-size:12.5px;margin-top:14px">Lupa kunci? Hubungi admin itekno.id. Belum punya form? <a href="buat">Buat form di sini</a>.</p></div>`;
     $('lm').onclick = () => { const i = FU.idForm($('lu').value); if (!i) return login('Link form belum benar.'); B.kon.id = i; B.kon.kunci = $('lk').value.trim().toUpperCase(); simpanB(); muat(); };
     $('lk').onkeydown = e => { if (e.key === 'Enter') $('lm').click(); };
   }
@@ -131,13 +131,13 @@
     if (!id() || !/^FU-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(B.kon.kunci || '')) return login('');
     $('isi').innerHTML = '<div class="kosong"><span class="spin dk" style="width:30px;height:30px"></span><p style="margin-top:12px">Memuat data ulasan…</p></div>';
     Promise.all([FU.panggil('data', [id(), B.kon.kunci]), FU.panggil('cek', [id(), B.kon.kunci]).catch(() => ({}))])
-      .then(([d, c]) => { D = d; D.cfg = c.cfg ? FU.rapikan(c.cfg) : (B.cfg ? FU.rapikan(B.cfg) : FU.rapikan({})); B.info = d.info; simpanB(); gambar(); })
+      .then(([d, c]) => { D = d; D.cfg = c.cfg ? FU.rapikan(c.cfg) : (B.cfg ? FU.rapikan(B.cfg) : FU.rapikan({})); D.info = c.info || d.info; B.info = D.info; B.kon.id = D.info.id || id(); simpanB(); gambar(); })
       .catch(e => login(e.message));
   }
 
   /* ---------- Gambar dashboard ---------- */
   function gambar() {
-    const cfg = D.cfg, br = cfg.brand, I = D.info, link = new URL('f/?s=' + id(), new URL('./', location.href)).href;
+    const cfg = D.cfg, br = cfg.brand, I = D.info, link = FU.linkForm(I.slug || id());
     const kelas = I.aktif ? 'aktif' : I.kedaluwarsa ? 'mati' : 'uji';
     const B_ = I.batas || FU.SITUS.batasUji, j = Math.min(I.uji || 0, B_);
     const wa = FU.waAktivasi({ nama: br.nama, email: I.email || B.kon.email, id: id(), perpanjang: kelas === 'mati' });

@@ -169,6 +169,8 @@
   .hasil{border:1.5px solid #b2f2bb;background:linear-gradient(180deg,#fff,var(--okl));border-radius:16px;padding:18px;text-align:center}
   .hasil .url{display:flex;gap:6px;margin:12px 0}
   .hasil .url input{flex:1;min-width:0;font-family:ui-monospace,monospace;font-size:12px}
+  .hasil .url .pre{align-self:center;font:12px ui-monospace,monospace;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:48%}
+  .hasil .url input[readonly]{background:#f1f3f5}
   .qrw{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:6px}
   .qrw canvas{width:220px;height:auto;border-radius:14px;box-shadow:0 10px 26px -16px rgba(0,0,0,.4)}
   .btnrow{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
@@ -213,7 +215,7 @@
   <a class="lg" href="./"><i>⭐</i><div><b>Form Ulasan</b><small>by itekno.id</small></div></a>
   <div class="sp"></div>
   <div class="simpanStat" id="stat"><i class="d"></i><span id="statTxt">Draf tersimpan di perangkat ini</span></div>
-  <a class="btn sec" href="dashboard.html" id="btnDash">📊<span> Dashboard</span></a>
+  <a class="btn sec" href="dashboard" id="btnDash">📊<span> Dashboard</span></a>
   <button class="btn pri" id="btnTerbit">Uji coba</button>
 </header>
 
@@ -221,7 +223,7 @@
   <nav class="side" id="side"></nav>
   <main class="main" id="main"></main>
   <aside class="prev" id="prev">
-    <div class="phone"><iframe id="frame" src="f/?pratinjau=1" title="Pratinjau form"></iframe></div>
+    <div class="phone"><iframe id="frame" src="f/?pratinjau=1&v=20261027b" title="Pratinjau form"></iframe></div>
     <div class="prevBar"><span>Pratinjau langsung</span><button id="ulangPrev">↺ Dari awal</button><button class="tutup hidden" id="tutupPrev">✕ Tutup</button></div>
   </aside>
 </div>
@@ -229,8 +231,8 @@
 <div class="toast" id="toast"></div>
 <div class="modal" id="modal"><div class="mbox"><h3 id="mJudul"></h3><p id="mPesan"></p><div class="btnrow"><button class="btn sec" id="mBatal">Batal</button><button class="btn pri" id="mOke">Ya, lanjutkan</button></div></div></div>
 
-<script src="assets/inti.js"></script>
-<script src="assets/qrcode.js"></script>
+<script src="assets/inti.js?v=20261027b"></script>
+<script src="assets/qrcode.js?v=20261027b"></script>
 <script>
 (function () {
   'use strict';
@@ -569,7 +571,7 @@
   }
 
   /* ================= 6. Uji coba & aktivasi (server pusat) ================= */
-  const linkForm = id => new URL('f/?s=' + id, new URL('./', location.href)).href;
+  const linkForm = () => FU.linkForm((S.info && S.info.id === S.kon.id && S.info.slug) || S.kon.id);
   const sibuk = (b, on, teks) => { b.disabled = on; if (on) { b._h = b.innerHTML; b.innerHTML = `<span class="spin${b.classList.contains('sec') ? ' dk' : ''}"></span>${teks}`; } else if (b._h) b.innerHTML = b._h; };
   const pesan = (box, kelas, html) => { if ($(box)) $(box).innerHTML = html ? `<div class="msg ${kelas}">${html}</div>` : ''; };
   function rTerbit(m) {
@@ -584,7 +586,7 @@
         <div class="f"><label>Email Gmail usaha Anda <small>(untuk lisensi &amp; Google Sheet nanti)</small></label><input class="in" id="kEmail" type="email" placeholder="nama@gmail.com" value="${esc(k.email)}"></div>
         <button class="btn pri" id="bMulai">🧪 Mulai uji coba</button><div id="mMulai"></div></div>
       <div class="card"><h3>🔑 Sudah punya form?</h3><p class="hint" style="margin-bottom:10px">Buka form yang sudah dibuat dari perangkat lain dengan link form dan kunci klien.</p>
-        <div class="row2"><div class="f"><label>Link form</label><input class="in" id="kLink" placeholder="…/f/?s=xxxxxxxxxx"></div>
+        <div class="row2"><div class="f"><label>Link form</label><input class="in" id="kLink" placeholder="…/form-ulasan/nama-usaha"></div>
         <div class="f"><label>Kunci klien</label><input class="in" id="kKunci" placeholder="FU-XXXX-XXXX-XXXX" style="font-family:ui-monospace,monospace;text-transform:uppercase"></div></div>
         <button class="btn sec" id="bMasuk">Buka form saya</button><div id="mMasuk"></div></div>`;
       $('kEmail').oninput = e => { k.email = e.target.value.trim(); simpanDraf(); };
@@ -592,32 +594,46 @@
         if (k.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(k.email)) return pesan('mMulai', 'err', 'Format email belum benar.');
         const b = $('bMulai'), cfg = FU.rapikan(S.cfg); sibuk(b, true, 'Menyiapkan form…');
         FU.panggil('daftar', [cfg, k.email]).then(d => {
-          k.id = d.id; k.kunci = d.kunci; S.terbit = JSON.stringify(cfg); S.info = { aktif: false, uji: 0, batas: FU.SITUS.batasUji, emailServer: d.emailServer };
+          k.id = d.id; k.kunci = d.kunci; S.terbit = JSON.stringify(cfg); S.info = { id: d.id, slug: d.slug, aktif: false, uji: 0, batas: FU.SITUS.batasUji, emailServer: d.emailServer };
           ubah(); rTerbit(m); toast('🧪 Form uji coba siap dicoba'); tampilKunci(true);
         }).catch(e => { sibuk(b, false); pesan('mMulai', 'err', esc(e.message)); });
       };
       $('bMasuk').onclick = () => {
         const id = FU.idForm($('kLink').value), kc = $('kKunci').value.trim().toUpperCase();
-        if (!id) return pesan('mMasuk', 'err', 'Link form belum benar.');
+        if (!id) return pesan('mMasuk', 'err', 'Link form belum benar. Contoh: …/form-ulasan/nama-usaha');
         const b = $('bMasuk'); sibuk(b, true, 'Membuka…');
         FU.panggil('cek', [id, kc]).then(x => {
-          k.id = id; k.kunci = kc; S.cfg = FU.rapikan(x.cfg || S.cfg); S.terbit = JSON.stringify(S.cfg); S.info = x.info; S.buka = null;
+          k.id = (x.info && x.info.id) || id; k.kunci = kc; S.cfg = FU.rapikan(x.cfg || S.cfg); S.terbit = JSON.stringify(S.cfg); S.info = x.info; S.buka = null;
           ubah('awal', false); rTerbit(m); toast('Form dibuka');
         }).catch(e => { sibuk(b, false); pesan('mMasuk', 'err', esc(e.message)); });
       };
       return;
     }
     // Sudah punya form
-    const L = linkForm(k.id), info = S.info || {};
+    const L = linkForm(), info = S.info || {}, kunciLink = info.aktif && info.slug;
     m.innerHTML = `<h2>Uji coba & aktivasi</h2><p class="desc">Form Anda sudah online. Setiap perubahan desain diterbitkan dengan tombol di bawah — link &amp; QR tetap sama.</p>
       <div class="card"><h3>🔗 Form Anda</h3>
         <div class="hasil" style="text-align:left;padding:14px"><div class="url" style="margin:0 0 10px"><input class="in" readonly value="${esc(L)}" id="lnk"><button class="btn sec" id="cp">${IC.copy}Salin</button></div>
         <div class="btnrow" style="justify-content:flex-start"><button class="btn pri" id="bTerbit">🚀 Terbitkan perubahan</button><a class="btn sec" href="${esc(L)}" target="_blank" rel="noopener">${IC.ext}Buka form</a>
-        <a class="btn sec" href="dashboard.html">📊 Dashboard</a><button class="btn ghost" id="bKunci">🔑 Lihat kunci klien</button></div><div id="mTerbit"></div></div></div>
+        <a class="btn sec" href="dashboard">📊 Dashboard</a><button class="btn ghost" id="bKunci">🔑 Lihat kunci klien</button></div><div id="mTerbit"></div>
+        <div class="f" style="margin:14px 0 0"><label>Nama link <small>${kunciLink ? '(terkunci setelah aktif — hubungi admin untuk mengganti)' : '(huruf kecil, angka, tanda hubung; bisa diganti selama uji coba)'}</small></label>
+          <div class="url" style="margin:0"><span class="pre">${esc((u => { const seg = u.pathname.split('/').filter(Boolean); return seg.length ? '…/' + seg[seg.length - 1] + '/' : u.host + '/'; })(new URL(FU.akar())))}</span><input class="in" id="slugIn" value="${esc(info.slug || '')}" ${kunciLink ? 'readonly' : ''} placeholder="nama-usaha" autocomplete="off" spellcheck="false">${kunciLink ? '' : '<button class="btn sec" id="bSlug">Simpan</button>'}</div><div id="mSlug"></div></div></div></div>
       <div id="hasil"></div>
       <p class="hint" style="margin-top:8px">Bukan form Anda? <a href="#" id="bKeluar">Keluar dari form ini di perangkat ini</a>.</p>`;
     $('cp').onclick = () => { $('lnk').select(); (navigator.clipboard ? navigator.clipboard.writeText(L) : Promise.reject()).catch(() => document.execCommand('copy')).finally(() => toast('Link disalin')); };
     $('bKunci').onclick = () => tampilKunci(false);
+    if ($('bSlug')) {
+      const rapi = v => v.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+/, '').slice(0, 30);
+      $('slugIn').oninput = e => { const p = e.target.selectionStart, v = rapi(e.target.value); if (v !== e.target.value) { e.target.value = v; e.target.setSelectionRange(p, p); } };
+      $('slugIn').onkeydown = e => { if (e.key === 'Enter') $('bSlug').click(); };
+      $('bSlug').onclick = () => {
+        const v = $('slugIn').value.replace(/-+$/, ''), b = $('bSlug');
+        if (v === info.slug) return pesan('mSlug', 'ok', 'Nama link tidak berubah.');
+        sibuk(b, true, ''); pesan('mSlug');
+        FU.panggil('ubahLink', [k.id, k.kunci, v]).then(x => { S.info = x; simpanDraf(); rTerbit(m); toast('🔗 Link form diperbarui'); })
+          .catch(e => { sibuk(b, false); pesan('mSlug', 'err', esc(e.message)); });
+      };
+    }
     $('bKeluar').onclick = e => { e.preventDefault(); tanyaYakin('Keluar dari form ini?', 'Desain tetap tersimpan di server. Untuk membuka lagi, gunakan link form dan kunci klien.', () => { S.kon = KON0(); S.terbit = ''; S.info = null; ubah(); rTerbit(m); }); };
     $('bTerbit').onclick = () => {
       const b = $('bTerbit'), cfg = FU.rapikan(S.cfg); sibuk(b, true, 'Menerbitkan…'); pesan('mTerbit');
@@ -625,7 +641,7 @@
         .catch(e => { sibuk(b, false); pesan('mTerbit', 'err', esc(e.message)); });
     };
     hasil();
-    FU.panggil('cek', [k.id, k.kunci]).then(x => { S.info = x.info; simpanDraf(); hasil(); }).catch(() => {});
+    FU.panggil('cek', [k.id, k.kunci]).then(x => { const beda = (S.info || {}).slug !== x.info.slug || !!(S.info || {}).aktif !== !!x.info.aktif; S.info = x.info; simpanDraf(); beda ? rTerbit(m) : hasil(); }).catch(() => {});
   }
   function tampilKunci(baru) {
     $('mJudul').textContent = baru ? '🔑 Simpan kunci klien Anda' : '🔑 Kunci klien';
@@ -638,7 +654,7 @@
   }
   function hasil() {
     if (!$('hasil')) return;
-    const L = linkForm(S.kon.id), info = S.info || {}, B = info.batas || FU.SITUS.batasUji;
+    const L = linkForm(), info = S.info || {}, B = info.batas || FU.SITUS.batasUji;
     if (info.aktif) {
       $('hasil').innerHTML = `<div class="hasil"><div style="font-size:34px">🎉</div><h3 style="font:600 17px Poppins">Form Anda sudah aktif!</h3>
         <p class="hint">Lisensi ${info.lisensi ? 'untuk <b>' + esc(info.lisensi.e) + '</b>' : ''}${info.berlaku ? ' berlaku sampai <b>' + esc(info.berlaku) + '</b>' : ' berlaku selamanya'}. Ulasan masuk ke Google Sheet Anda.</p>
@@ -654,7 +670,7 @@
       <div class="kuota"><div class="kb"><i style="width:${j / B * 100}%"></i></div><small>${j} dari ${B} ulasan uji coba terpakai</small></div>
       <div class="beli"><b>Suka dengan hasilnya?</b><p>Aktifkan form untuk ulasan <b>tanpa batas</b>, data masuk ke Google Sheet Anda, kartu QR siap cetak, dan tanpa tanda uji coba.</p>
         <a class="btn wa" href="${esc(wa)}" target="_blank" rel="noopener">💳 ${info.kedaluwarsa ? 'Perpanjang lisensi' : 'Buat form (aktifkan)'}</a>
-        <small>Pembayaran melalui WhatsApp admin itekno.id. Setelah menerima lisensi, aktifkan di <a href="dashboard.html">dashboard</a>.</small></div></div>`;
+        <small>Pembayaran melalui WhatsApp admin itekno.id. Setelah menerima lisensi, aktifkan di <a href="dashboard">dashboard</a>.</small></div></div>`;
   }
   const kartuQR = (cv, url) => FU.kartuQR(cv, url, FU.rapikan(S.cfg));
 

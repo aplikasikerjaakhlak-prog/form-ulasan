@@ -2,6 +2,8 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
+<script>/* Link rapi …/form-ulasan/nama-usaha disajikan lewat 404.html (salinan halaman ini): arahkan file relatif ke folder f/ */
+(function () { var p = location.pathname.replace(/\/+$/, ''); if (!/\/f(\/index\.html)?$/.test(p) && !/\/f$/.test(location.pathname.replace(/\/$/, ''))) document.write('<base data-fu href="' + p.replace(/[^\/]*$/, '') + 'f/">'); })();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Form Ulasan</title>
 <meta name="description" content="Beri ulasan Anda — Form Ulasan by itekno.id">
@@ -234,7 +236,7 @@
 </main>
 <footer class="kaki" id="kaki"></footer>
 
-<script src="../assets/inti.js"></script>
+<script src="../assets/inti.js?v=20261027b"></script>
 <script>
 (function () {
   'use strict';
@@ -242,7 +244,7 @@
   const esc = FU.esc;
   const P = new URLSearchParams(location.search);
   const MODE = P.get('pratinjau') ? 'pratinjau' : P.get('demo') ? 'demo' : 'live';
-  const SID = FU.idForm(P.get('s') || '');
+  const SID = FU.idForm(P.get('s') || '') || (MODE === 'live' ? FU.idForm(location.pathname) : '');
   const KEY = 'fu_' + (SID || 'demo').slice(-16);
 
   let C = null;            // konfigurasi
@@ -294,7 +296,7 @@
     let ico = document.querySelector('link[rel=icon]');
     if (!ico) { ico = document.createElement('link'); ico.rel = 'icon'; document.head.appendChild(ico); }
     ico.href = b.logo || 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="88">${esc(b.ikon)}</text></svg>`);
-    const beranda = new URL('../', location.href).href;
+    const beranda = FU.akar();
     let pita = $('pita');
     if (SISA !== null && MODE === 'live') {
       if (!pita) { pita = document.createElement('div'); pita.id = 'pita'; $('card').prepend(pita); }

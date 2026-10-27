@@ -301,12 +301,30 @@
 
   // id deployment Apps Script dari URL /exec
   // ID form (10 karakter) dari link form / link dashboard / ID langsung
+  // Kode form dari link/teks: ID 10 karakter atau nama link (…/f/?s=kode, …/form-ulasan/nama-link, atau kode saja)
+  const SLUG_TERLARANG = ['f', 'assets', 'buat', 'dashboard', 'index', '404', 'admin', 'api', 'alat-admin', 'demo', 'readme', 'form', 'login'];
+  const polaKode = /^[a-z0-9][a-z0-9-]{1,28}[a-z0-9]$/;
   function idForm(u) {
     u = String(u || '').trim();
-    const q = u.match(/[?&]s=([a-z0-9]{10})(?![a-z0-9])/i);
-    if (q) return q[1].toLowerCase();
-    return /^[a-z0-9]{10}$/i.test(u) ? u.toLowerCase() : '';
+    const q = u.match(/[?&]s=([A-Za-z0-9-]{3,30})(?![A-Za-z0-9-])/);
+    if (q) return polaKode.test(q[1].toLowerCase()) ? q[1].toLowerCase() : '';
+    if (/^https?:\/\//i.test(u) || u.charAt(0) === '/') {
+      let path = u.replace(/^https?:\/\/[^/]+/i, '').split(/[?#]/)[0].replace(/\/+$/, '');
+      if (/\/f(\/index\.html)?$/.test(path)) return '';
+      u = path.slice(path.lastIndexOf('/') + 1);
+      if (/\.html?$/i.test(u)) return '';
+    }
+    u = u.toLowerCase();
+    return polaKode.test(u) && SLUG_TERLARANG.indexOf(u) < 0 ? u : '';
   }
+  // Akar situs (folder tempat buat.html/dashboard berada), juga benar dari halaman f/ dan 404
+  function akar() {
+    const b = document.querySelector('base[data-fu]');
+    if (b) return new URL('../', b.href).href;
+    return new URL(/\/f\/(index\.html)?$/.test(location.pathname) ? '../' : './', location.href).href;
+  }
+  const linkForm = kode => akar() + encodeURIComponent(kode);
+
   const siapServer = () => /^https:\/\/script\.google\.com\//.test(SITUS.apiUrl);
   // Panggil server pusat (POST text/plain agar tanpa preflight CORS)
   function panggil(fn, args) {
@@ -386,6 +404,6 @@
     });
   }
 
-  W.FU = { SITUS, kartuQR, idForm, panggil, ambilConfig, siapServer, waAktivasi, linkWa, hariIni, FONT, LATAR, SUDUT, WARNA_CEPAT, TIPE, LABEL_BINTANG, EMOJI, MAKS_PERTANYAAN, TEMPLATE, SELESAI_DASAR,
+  W.FU = { SITUS, kartuQR, idForm, linkForm, akar, panggil, ambilConfig, siapServer, waAktivasi, linkWa, hariIni, FONT, LATAR, SUDUT, WARNA_CEPAT, TIPE, LABEL_BINTANG, EMOJI, MAKS_PERTANYAAN, TEMPLATE, SELESAI_DASAR,
            cfgBaru, rapikan, rapikanQ, pertanyaanBaru, skor, palet, campur, esc, amanUrl, amanGambar };
 })(window);
