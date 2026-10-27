@@ -336,7 +336,13 @@
   function waAktivasi(o) {
     const t = ['Halo admin itekno.id, saya ingin ' + (o.perpanjang ? 'memperpanjang' : 'mengaktifkan') + ' *Form Ulasan*.', '',
       'Nama usaha: ' + (o.nama || '-'), 'Email Gmail: ' + (o.email || '-'), 'ID form: ' + (o.id || '-'), '', 'Mohon info harga & cara pembayarannya. Terima kasih.'].join('\n');
-    return 'https://wa.me/' + String(SITUS.adminWa).replace(/\D/g, '') + '?text=' + encodeURIComponent(t);
+    return linkWa(SITUS.adminWa, t);
+  }
+  // HP: buka aplikasi WhatsApp. Komputer: langsung ke chat di WhatsApp Web (tanpa halaman perantara wa.me).
+  function linkWa(no, teks) {
+    no = String(no || '').replace(/\D/g, '').replace(/^0/, '62');
+    const hp = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    return (hp ? 'https://wa.me/' + no + '?text=' : 'https://web.whatsapp.com/send?phone=' + no + '&text=') + encodeURIComponent(teks);
   }
 
   // Kartu QR bermerek (perlu assets/qrcode.js)
@@ -368,6 +374,6 @@
   function rrect(x, a, b, w, h, r) { x.beginPath(); x.moveTo(a + r, b); x.arcTo(a + w, b, a + w, b + h, r); x.arcTo(a + w, b + h, a, b + h, r); x.arcTo(a, b + h, a, b, r); x.arcTo(a, b, a + w, b, r); x.closePath(); }
 
 
-  W.FU = { SITUS, kartuQR, bacaLisensi, cekLisensi, waAktivasi, hariIni, FONT, LATAR, SUDUT, WARNA_CEPAT, TIPE, LABEL_BINTANG, EMOJI, MAKS_PERTANYAAN, TEMPLATE, SELESAI_DASAR,
+  W.FU = { SITUS, kartuQR, bacaLisensi, cekLisensi, waAktivasi, linkWa, hariIni, FONT, LATAR, SUDUT, WARNA_CEPAT, TIPE, LABEL_BINTANG, EMOJI, MAKS_PERTANYAAN, TEMPLATE, SELESAI_DASAR,
            cfgBaru, rapikan, rapikanQ, pertanyaanBaru, skor, palet, campur, esc, amanUrl, amanGambar, idDariUrl, urlApi };
 })(window);
