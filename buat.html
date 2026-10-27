@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buat Form Ulasan — itekno.id</title>
+<meta name="description" content="Desain form ulasan pelanggan sesuai tema usaha Anda. Data masuk langsung ke Google Sheet Anda.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='88'%3E%E2%AD%90%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&family=Playfair+Display:wght@600&family=Lato:wght@400&family=Nunito:wght@700&family=Plus+Jakarta+Sans:wght@600&family=DM+Serif+Display&display=swap">
+<style>
+  :root{--a:#d71920;--ad:#a8121a;--al:#fdecec;--ink:#1d1f24;--mut:#6b7280;--line:#e6e7eb;--bg:#f5f6f8;--ok:#2b8a3e;--okl:#ebfbee;
+    --warn:#a35b00;--warnl:#fff4e6;--ease:cubic-bezier(.22,1,.36,1)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font:14px/1.5 'Inter',system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+  button,input,textarea,select{font:inherit;color:inherit}
+  button{cursor:pointer}
+  .hidden{display:none!important}
+
+  /* ===== Bar atas ===== */
+  .top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;padding:10px 18px;background:rgba(255,255,255,.92);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .top .lg{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink)}
+  .top .lg i{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--a),var(--ad));display:grid;place-items:center;font-style:normal;font-size:17px}
+  .top .lg b{font:600 15px 'Poppins',sans-serif;display:block;line-height:1.1}
+  .top .lg small{font-size:11px;color:var(--mut)}
+  .top .sp{flex:1}
+  .simpanStat{font-size:12px;color:var(--mut);display:flex;align-items:center;gap:6px}
+  .simpanStat .d{width:7px;height:7px;border-radius:50%;background:#adb5bd}
+  .simpanStat.beda .d{background:#f59f00}
+  .simpanStat.ok .d{background:var(--ok)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:0;border-radius:10px;padding:10px 16px;font:600 13.5px 'Poppins',sans-serif;
+    transition:all .2s;text-decoration:none;white-space:nowrap}
+  .btn.pri{background:var(--a);color:#fff;box-shadow:0 8px 18px -10px var(--a)} .btn.pri:hover{background:var(--ad)}
+  .btn.sec{background:#fff;border:1.5px solid var(--line);color:var(--ink)} .btn.sec:hover{border-color:#cdd1d8}
+  .btn.ghost{background:none;color:var(--mut);padding:8px 10px}
+  .btn:disabled{opacity:.55;cursor:not-allowed}
+  .btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+  /* ===== Tata letak ===== */
+  .lay{display:grid;grid-template-columns:220px minmax(0,1fr) 420px;gap:0;min-height:calc(100vh - 57px)}
+  .side{border-right:1px solid var(--line);background:#fff;padding:18px 12px;position:sticky;top:57px;height:calc(100vh - 57px);overflow:auto}
+  .side button{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border:0;border-radius:10px;background:none;text-align:left;margin-bottom:4px;transition:background .2s}
+  .side button .n{width:24px;height:24px;border-radius:50%;background:#f1f3f5;color:var(--mut);display:grid;place-items:center;font:600 11.5px 'Poppins';flex:0 0 auto}
+  .side button b{display:block;font:600 13.5px 'Poppins',sans-serif}
+  .side button small{display:block;font-size:11.5px;color:var(--mut);line-height:1.3}
+  .side button:hover{background:#f8f9fa}
+  .side button.on{background:var(--al)} .side button.on .n{background:var(--a);color:#fff}
+  .side .bantu{margin-top:18px;padding:12px;border-radius:12px;background:#f8f9fa;font-size:12px;color:var(--mut)}
+  .main{padding:26px 30px 120px;max-width:760px;width:100%}
+  .main h2{font:600 22px 'Poppins',sans-serif;margin-bottom:4px}
+  .main .desc{color:var(--mut);margin-bottom:20px}
+  .prev{position:sticky;top:57px;height:calc(100vh - 57px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;
+    border-left:1px solid var(--line);background:radial-gradient(circle at 50% 30%,#fff,#eceef2)}
+  .phone{width:360px;height:min(720px,calc(100vh - 130px));border-radius:38px;background:#111;padding:10px;box-shadow:0 30px 60px -30px rgba(0,0,0,.5);position:relative}
+  .phone::before{content:"";position:absolute;top:16px;left:50%;transform:translateX(-50%);width:90px;height:20px;border-radius:12px;background:#111;z-index:2}
+  .phone iframe{width:100%;height:100%;border:0;border-radius:30px;background:#fff}
+  .prevBar{display:flex;gap:6px;margin-top:12px;align-items:center;font-size:12px;color:var(--mut)}
+  .prevBar button{border:1px solid var(--line);background:#fff;border-radius:99px;padding:5px 11px;font-size:12px}
+  .fab{display:none}
+
+  /* ===== Komponen form editor ===== */
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px}
+  .card h3{font:600 15px 'Poppins',sans-serif;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .f{margin-bottom:12px}
+  .f > label{display:block;font-size:12.5px;font-weight:600;color:#495057;margin-bottom:5px}
+  .f > label small{font-weight:400;color:var(--mut)}
+  .in{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;transition:border-color .2s,box-shadow .2s}
+  textarea.in{min-height:70px;resize:vertical;line-height:1.45}
+  .in:focus{outline:0;border-color:var(--a);box-shadow:0 0 0 3px var(--al)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .hint{font-size:12px;color:var(--mut);margin-top:4px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:7px 14px;font-weight:500;font-size:13px;transition:all .2s}
+  .chip.on{border-color:var(--a);background:var(--al);color:var(--ad)}
+  .tgl{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0}
+  .tgl + .tgl{border-top:1px solid #f1f3f5}
+  .tgl b{font-weight:500} .tgl small{display:block;color:var(--mut);font-size:12px}
+  .sw{position:relative;width:42px;height:24px;flex:0 0 auto}
+  .sw input{opacity:0;width:0;height:0;position:absolute}
+  .sw span{position:absolute;inset:0;border-radius:99px;background:#ced4da;transition:.25s;cursor:pointer}
+  .sw span::after{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;border-radius:50%;background:#fff;transition:.25s var(--ease);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .sw input:checked + span{background:var(--a)} .sw input:checked + span::after{transform:translateX(18px)}
+  .sw input:disabled + span{opacity:.4;cursor:not-allowed}
+
+  /* Template */
+  .tpls{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+  .tpl{position:relative;border:1.5px solid var(--line);border-radius:16px;background:#fff;padding:0;text-align:left;overflow:hidden;transition:all .25s var(--ease)}
+  .tpl:hover{transform:translateY(-3px);box-shadow:0 14px 26px -18px rgba(0,0,0,.4)}
+  .tpl.on{border-color:var(--a);box-shadow:0 0 0 3px var(--al)}
+  .tpl .tc{height:74px;display:flex;align-items:center;gap:10px;padding:0 14px;color:#fff}
+  .tpl .tc i{width:38px;height:38px;border-radius:11px;background:#fff;display:grid;place-items:center;font-size:20px;font-style:normal}
+  .tpl .tc b{font:600 13px 'Poppins';line-height:1.2}
+  .tpl .tb{padding:10px 14px 12px}
+  .tpl .tb b{display:block;font:600 14px 'Poppins'} .tpl .tb small{color:var(--mut);font-size:12px}
+  .tpl .cek{position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;background:#fff;color:var(--a);display:none;place-items:center;font-size:13px;font-weight:700}
+  .tpl.on .cek{display:grid}
+
+  /* Warna & font */
+  .sw8{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .sw8 button{width:32px;height:32px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1.5px var(--line);transition:transform .2s}
+  .sw8 button:hover{transform:scale(1.1)}
+  .sw8 button.on{box-shadow:0 0 0 2.5px var(--ink)}
+  .sw8 .pick{position:relative;width:32px;height:32px;border-radius:50%;overflow:hidden;box-shadow:0 0 0 1.5px var(--line);background:conic-gradient(red,yellow,lime,aqua,blue,magenta,red)}
+  .sw8 .pick input{position:absolute;inset:-8px;opacity:0;cursor:pointer;width:50px;height:50px}
+  .hex{width:96px;font-family:ui-monospace,monospace;font-size:13px}
+  .fonts{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+  .fonts button{border:1.5px solid var(--line);border-radius:12px;background:#fff;padding:12px 10px;text-align:center}
+  .fonts button b{display:block;font-size:20px;line-height:1.2}
+  .fonts button small{color:var(--mut);font-size:11.5px}
+  .fonts button.on{border-color:var(--a);background:var(--al)}
+  .logoBox{display:flex;gap:14px;align-items:center}
+  .logoPrev{width:68px;height:68px;border-radius:16px;border:1.5px dashed #ced4da;display:grid;place-items:center;font-size:30px;overflow:hidden;background:#fff;flex:0 0 auto}
+  .logoPrev img{width:100%;height:100%;object-fit:contain;padding:6px}
+  .emojis{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+  .emojis button{width:34px;height:34px;border:1px solid var(--line);border-radius:9px;background:#fff;font-size:18px}
+
+  /* Pertanyaan */
+  .qs{display:flex;flex-direction:column;gap:10px}
+  .qc{border:1.5px solid var(--line);border-radius:14px;background:#fff;overflow:hidden;transition:border-color .2s,box-shadow .2s;animation:fadeUp .35s var(--ease) both}
+  .qc.open{border-color:#c9ccd3;box-shadow:0 12px 24px -18px rgba(0,0,0,.35)}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}}
+  .qh{display:flex;align-items:center;gap:10px;padding:12px 12px 12px 14px;cursor:pointer;user-select:none}
+  .qh .ic{width:34px;height:34px;border-radius:10px;background:#f1f3f5;display:grid;place-items:center;font-size:16px;flex:0 0 auto}
+  .qh .t{flex:1;min-width:0}
+  .qh .t b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .qh .t small{color:var(--mut);font-size:12px}
+  .qh .t small em{font-style:normal;color:var(--a);font-weight:600}
+  .ib{width:30px;height:30px;border:0;border-radius:8px;background:none;color:var(--mut);display:grid;place-items:center;flex:0 0 auto}
+  .ib:hover{background:#f1f3f5;color:var(--ink)} .ib.del:hover{background:var(--al);color:var(--a)}
+  .ib:disabled{opacity:.3;pointer-events:none}
+  .ib svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+  .qb{padding:4px 16px 16px;border-top:1px solid #f1f3f5;display:none}
+  .qc.open .qb{display:block;animation:fadeUp .3s var(--ease)}
+  .lst{border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+  .lst .li{display:flex;align-items:center;gap:4px;padding:4px 4px 4px 10px;border-bottom:1px solid #f1f3f5}
+  .lst .li input{flex:1;border:0;padding:7px 4px;background:none;min-width:0}
+  .lst .li input:focus{outline:0;background:#f8f9fa;border-radius:6px}
+  .lst .add{display:flex;gap:6px;padding:6px;background:#fafafa}
+  .lst .add input{flex:1;border:1.5px solid var(--line);border-radius:8px;padding:6px 10px;min-width:0}
+  .kt{width:100%;border-collapse:collapse}
+  .kt td{padding:7px 4px;border-bottom:1px solid #f1f3f5} .kt th{font-size:11.5px;color:var(--mut);font-weight:600;text-align:left;padding:4px}
+  .kt td:not(:first-child),.kt th:not(:first-child){width:70px;text-align:center}
+  .tambahQ{width:100%;border:2px dashed #ced4da;background:none;border-radius:14px;padding:14px;font-weight:600;color:var(--mut);transition:all .2s}
+  .tambahQ:hover{border-color:var(--a);color:var(--a);background:#fff}
+  .tipes{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:10px}
+  .tipes button{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:12px;background:#fff;padding:10px;text-align:left;font-weight:500;font-size:13px}
+  .tipes button:hover{border-color:var(--a);background:var(--al)}
+  .tipes button span{font-size:18px}
+
+  .seg{display:inline-flex;background:#f1f3f5;border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
+  .seg button{border:0;background:none;border-radius:8px;padding:7px 12px;font-weight:500;font-size:13px;color:var(--mut)}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+  .lnk{display:grid;grid-template-columns:1fr 1.4fr auto;gap:6px;margin-bottom:8px}
+  .preset{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .preset button{border:1px dashed #ced4da;background:#fff;border-radius:99px;padding:5px 10px;font-size:12px;color:var(--mut)}
+
+  /* Hubungkan */
+  .step{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid #f1f3f5}
+  .step:last-child{border-bottom:0}
+  .step .no{width:30px;height:30px;border-radius:50%;background:#f1f3f5;display:grid;place-items:center;font:600 13px 'Poppins';flex:0 0 auto}
+  .step.ok .no{background:var(--ok);color:#fff}
+  .step .sb{flex:1;min-width:0}
+  .step h4{font:600 14.5px 'Poppins',sans-serif;margin-bottom:4px}
+  .step ol{padding-left:18px;color:#495057;margin:6px 0 10px} .step ol li{margin:3px 0}
+  .step code{background:#f1f3f5;border-radius:5px;padding:1px 6px;font-size:12.5px}
+  .msg{border-radius:10px;padding:10px 12px;font-size:13px;margin-top:10px;display:flex;gap:8px;align-items:flex-start}
+  .msg.ok{background:var(--okl);color:var(--ok)} .msg.err{background:var(--al);color:var(--ad)} .msg.info{background:#e7f5ff;color:#1864ab} .msg.warn{background:var(--warnl);color:var(--warn)}
+  .hasil{border:1.5px solid #b2f2bb;background:linear-gradient(180deg,#fff,var(--okl));border-radius:16px;padding:18px;text-align:center}
+  .hasil .url{display:flex;gap:6px;margin:12px 0}
+  .hasil .url input{flex:1;min-width:0;font-family:ui-monospace,monospace;font-size:12px}
+  .qrw{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:6px}
+  .qrw canvas{width:220px;height:auto;border-radius:14px;box-shadow:0 10px 26px -16px rgba(0,0,0,.4)}
+  .btnrow{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  .hasil.uji{border-color:#ffe066;background:linear-gradient(180deg,#fff,#fff9db)}
+  .kuota{max-width:320px;margin:12px auto 4px}.kuota small{font-size:12px;color:var(--mut)}
+  .kb{height:8px;border-radius:99px;background:#f1f3f5;overflow:hidden;margin-bottom:4px}.kb i{display:block;height:100%;background:#f59f00;border-radius:99px}
+  .beli{margin-top:16px;padding:18px;border-radius:14px;background:#fff;border:1px solid var(--line)}
+  .beli > b{font:600 16px 'Poppins'} .beli p{color:var(--mut);margin:4px 0 12px} .beli small{display:block;margin-top:10px;color:var(--mut);font-size:12px}
+  .btn.wa{background:#25d366;color:#fff;padding:12px 20px;font-size:14.5px;box-shadow:0 10px 20px -12px #25d366}
+  .lanjutBar{display:flex;justify-content:space-between;gap:10px;margin-top:22px}
+  .spin{width:16px;height:16px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:putar .8s linear infinite}
+  .spin.dk{border-color:#dee2e6;border-top-color:var(--a)}
+  @keyframes putar{to{transform:rotate(360deg)}}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,30px);opacity:0;background:#212529;color:#fff;padding:10px 16px;border-radius:12px;
+    font-size:13px;z-index:60;transition:all .35s var(--ease);pointer-events:none;max-width:90vw}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  .modal{position:fixed;inset:0;background:rgba(17,20,24,.5);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+  .modal.show{display:flex}
+  .mbox{background:#fff;border-radius:18px;padding:22px;max-width:400px;width:100%;animation:fadeUp .3s var(--ease)}
+  .mbox h3{font:600 17px 'Poppins';margin-bottom:6px} .mbox p{color:var(--mut);margin-bottom:16px}
+  .mbox .btnrow{justify-content:flex-end}
+
+  @media (max-width:1180px){ .lay{grid-template-columns:200px minmax(0,1fr) 380px} .phone{width:330px} }
+  @media (max-width:980px){
+    .lay{display:block}
+    .side{position:sticky;top:55px;z-index:15;height:auto;display:flex;gap:6px;overflow-x:auto;padding:8px 10px;border-right:0;border-bottom:1px solid var(--line)}
+    .side button{width:auto;flex:0 0 auto;margin:0;padding:7px 12px 7px 8px}
+    .side button small,.side .bantu{display:none}
+    .main{padding:18px 16px 110px;max-width:none}
+    .prev{display:none;position:fixed;inset:0;z-index:40;height:auto;border:0;background:rgba(17,20,24,.82);backdrop-filter:blur(4px)}
+    .prev.show{display:flex}
+    .phone{width:min(360px,92vw);height:min(720px,calc(100vh - 110px))}
+    .prevBar{color:#fff} .prevBar button{color:var(--ink)} .prevBar .tutup{display:inline-block!important}
+    .fab{display:flex;position:fixed;right:16px;bottom:18px;z-index:30;border-radius:99px;padding:12px 18px;box-shadow:0 12px 26px -10px rgba(0,0,0,.45)}
+    .top{padding:8px 12px;gap:8px} .top .lg small{display:none} .simpanStat span{display:none} #btnDash{padding:9px 11px} #btnDash span{display:none}
+  }
+  @media (max-width:560px){ .row2,.lnk{grid-template-columns:1fr} .lnk .ib{justify-self:end} .tpls{grid-template-columns:1fr 1fr} .tpl .tc{height:60px} }
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="lg" href="./"><i>⭐</i><div><b>Form Ulasan</b><small>by itekno.id</small></div></a>
+  <div class="sp"></div>
+  <div class="simpanStat" id="stat"><i class="d"></i><span id="statTxt">Draf tersimpan di perangkat ini</span></div>
+  <a class="btn sec" href="dashboard.html" id="btnDash">📊<span> Dashboard</span></a>
+  <button class="btn pri" id="btnTerbit">Uji coba</button>
+</header>
+
+<div class="lay">
+  <nav class="side" id="side"></nav>
+  <main class="main" id="main"></main>
+  <aside class="prev" id="prev">
+    <div class="phone"><iframe id="frame" src="f/?pratinjau=1" title="Pratinjau form"></iframe></div>
+    <div class="prevBar"><span>Pratinjau langsung</span><button id="ulangPrev">↺ Dari awal</button><button class="tutup hidden" id="tutupPrev">✕ Tutup</button></div>
+  </aside>
+</div>
+<button class="btn pri fab" id="fab"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Pratinjau</button>
+<div class="toast" id="toast"></div>
+<div class="modal" id="modal"><div class="mbox"><h3 id="mJudul"></h3><p id="mPesan"></p><div class="btnrow"><button class="btn sec" id="mBatal">Batal</button><button class="btn pri" id="mOke">Ya, lanjutkan</button></div></div></div>
+
+<script src="assets/inti.js"></script>
+<script src="assets/qrcode.js"></script>
+<script>
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const esc = FU.esc;
+  const clone = o => JSON.parse(JSON.stringify(o));
+  const IC = {
+    up: '<svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>', down: '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>',
+    del: '<svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>', dup: '<svg viewBox="0 0 24 24"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>',
+    x: '<svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>', chev: '<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>',
+    copy: '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg>',
+    ext: '<svg viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M10 14L20 4"/><path d="M20 14v6H4V4h6"/></svg>',
+    dl: '<svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>'
+  };
+
+  /* ================= Status & penyimpanan draf ================= */
+  const DRAF = 'fu_builder_v1';
+  let S = muat() || { cfg: FU.cfgBaru('kafe'), sek: 'template', buka: null, kon: { url: '', kunci: '', ingat: true }, terbit: '', link: '', sheetUrl: '' };
+  function muat() {
+    try { const d = JSON.parse(localStorage.getItem(DRAF)); if (d && d.cfg) { d.cfg = FU.rapikan(d.cfg); d.kon = d.kon || { url: '', kunci: '', ingat: true }; return d; } } catch (e) {}
+    return null;
+  }
+  let tSimpan;
+  function simpanDraf() {
+    clearTimeout(tSimpan);
+    tSimpan = setTimeout(() => {
+      const d = clone(S); if (!d.kon.ingat) d.kon.kunci = '';
+      try { localStorage.setItem(DRAF, JSON.stringify(d)); } catch (e) { toast('Penyimpanan perangkat penuh — logo mungkin terlalu besar', 1); }
+    }, 300);
+  }
+  function ubah(ke, halus) {
+    simpanDraf(); statusTerbit();
+    pratinjau(ke, halus !== false);
+  }
+  function statusTerbit() {
+    const beda = S.terbit && S.terbit !== JSON.stringify(FU.rapikan(S.cfg));
+    $('stat').className = 'simpanStat' + (S.terbit ? (beda ? ' beda' : ' ok') : '');
+    $('btnTerbit').textContent = S.lis && S.lis.aktif ? 'Terbitkan' : 'Uji coba';
+    $('statTxt').textContent = !S.terbit ? 'Draf tersimpan di perangkat ini' : beda ? 'Ada perubahan belum diterbitkan' : 'Sudah diterbitkan';
+  }
+
+  /* ================= Pratinjau ================= */
+  let siap = false, keTerakhir = 'awal', tPrev;
+  window.addEventListener('message', e => { if (e.origin === location.origin && e.data && e.data.fu === 'siap') { siap = true; pratinjau(keTerakhir, false); } });
+  function pratinjau(ke, halus) {
+    if (ke !== undefined) { if (ke !== keTerakhir) halus = false; keTerakhir = ke; }
+    clearTimeout(tPrev);
+    tPrev = setTimeout(() => {
+      if (!siap) return;
+      const kat = typeof keTerakhir === 'string' && keTerakhir.startsWith('selesai:') ? keTerakhir.slice(8) : null;
+      $('frame').contentWindow.postMessage({ fu: 'cfg', cfg: FU.rapikan(S.cfg), ke: kat ? 'selesai' : keTerakhir, kat, halus: !!halus }, location.origin);
+    }, halus ? 160 : 0);
+  }
+  $('ulangPrev').onclick = () => { keTerakhir = null; pratinjau('awal', false); };
+  $('fab').onclick = () => { $('prev').classList.add('show'); pratinjau(keTerakhir, false); };
+  $('tutupPrev').onclick = () => $('prev').classList.remove('show');
+  $('prev').onclick = e => { if (e.target === $('prev')) $('prev').classList.remove('show'); };
+
+  /* ================= Navigasi bagian ================= */
+  const SEK = [
+    ['template', 'Template', 'Pilih jenis usaha'],
+    ['tampilan', 'Tampilan', 'Nama, logo, warna, font'],
+    ['sambutan', 'Sambutan', 'Halaman pembuka'],
+    ['pertanyaan', 'Pertanyaan', 'Susun pertanyaan'],
+    ['selesai', 'Halaman selesai', 'Pesan & tombol'],
+    ['terbit', 'Uji coba & aktivasi', 'Hubungkan Google Sheet']
+  ];
+  function nav() {
+    $('side').innerHTML = SEK.map((s, i) => `<button data-s="${s[0]}" class="${S.sek === s[0] ? 'on' : ''}"><span class="n">${i + 1}</span><span><b>${s[1]}</b><small>${s[2]}</small></span></button>`).join('') +
+      `<div class="bantu">💡 Semua perubahan langsung terlihat di pratinjau. Draf tersimpan otomatis di perangkat ini.</div>`;
+    $('side').querySelectorAll('button').forEach(b => b.onclick = () => buka(b.dataset.s));
+  }
+  function buka(s) {
+    S.sek = s; nav(); render(); window.scrollTo({ top: 0 });
+    const on = $('side').querySelector('.on'); if (on && on.scrollIntoView) on.scrollIntoView({ inline: 'center', block: 'nearest' });
+    const ke = { sambutan: 'awal', selesai: 'selesai:' + (katAktif || 'puas'), pertanyaan: S.buka || (S.cfg.pertanyaan[0] || {}).id }[s];
+    if (ke) pratinjau(ke, false);
+    simpanDraf();
+  }
+  $('btnTerbit').onclick = () => buka('terbit');
+
+  function render() {
+    const m = $('main');
+    ({ template: rTemplate, tampilan: rTampilan, sambutan: rSambutan, pertanyaan: rPertanyaan, selesai: rSelesai, terbit: rTerbit })[S.sek](m);
+    const i = SEK.findIndex(x => x[0] === S.sek);
+    if (S.sek !== 'terbit') {
+      m.insertAdjacentHTML('beforeend', `<div class="lanjutBar">${i ? `<button class="btn sec" id="sebelum">← ${SEK[i - 1][1]}</button>` : '<span></span>'}<button class="btn pri" id="berikut">${SEK[i + 1][1]} →</button></div>`);
+      if ($('sebelum')) $('sebelum').onclick = () => buka(SEK[i - 1][0]);
+      $('berikut').onclick = () => buka(SEK[i + 1][0]);
+    }
+  }
+
+  /* ================= Pembuat elemen kecil ================= */
+  const el = html => { const d = document.createElement('div'); d.innerHTML = html.trim(); return d.firstElementChild; };
+  function field(label, nilai, set, o = {}) {
+    const w = el(`<div class="f"><label>${label}</label>${o.area ? '<textarea class="in"></textarea>' : '<input class="in">'}${o.hint ? `<div class="hint">${o.hint}</div>` : ''}</div>`);
+    const i = w.querySelector('.in'); i.value = nilai || ''; if (o.max) i.maxLength = o.max; if (o.ph) i.placeholder = o.ph;
+    i.oninput = () => { set(i.value); ubah(o.ke); };
+    return w;
+  }
+  function toggle(judul, ket, nilai, set, o = {}) {
+    const w = el(`<label class="tgl"><span><b>${judul}</b>${ket ? `<small>${ket}</small>` : ''}</span><span class="sw"><input type="checkbox"><span></span></span></label>`);
+    const c = w.querySelector('input'); c.checked = !!nilai; c.disabled = !!o.mati;
+    c.onchange = () => { set(c.checked); ubah(o.ke, false); if (o.ulang) o.ulang(); };
+    return w;
+  }
+  function daftar(arr, ph, maks, ke, onBerubah) {
+    const w = el('<div class="lst"></div>');
+    function gambar() {
+      w.innerHTML = arr.map((v, i) => `<div class="li"><input value="${esc(v)}" maxlength="80"><button class="ib" data-o="up" ${i ? '' : 'disabled'} title="Naik">${IC.up}</button>
+        <button class="ib del" data-o="del" ${arr.length > 1 ? '' : 'disabled'} title="Hapus">${IC.x}</button></div>`).join('') +
+        `<div class="add"><input placeholder="${esc(ph)}" maxlength="80"><button class="btn sec" type="button">Tambah</button></div>`;
+      w.querySelectorAll('.li').forEach((li, i) => {
+        li.querySelector('input').oninput = e => { arr[i] = e.target.value; ubah(ke); };
+        li.querySelector('[data-o=up]').onclick = () => { [arr[i - 1], arr[i]] = [arr[i], arr[i - 1]]; gambar(); ubah(ke, false); };
+        li.querySelector('[data-o=del]').onclick = () => { arr.splice(i, 1); gambar(); ubah(ke, false); };
+      });
+      const ai = w.querySelector('.add input');
+      const tambah = () => { const v = ai.value.trim(); if (!v) return; if (arr.length >= maks) return toast('Maksimal ' + maks, 1);
+        if (arr.some(x => x.toLowerCase() === v.toLowerCase())) return toast('Sudah ada', 1);
+        arr.push(v); gambar(); ubah(ke, false); w.querySelector('.add input').focus(); if (onBerubah) onBerubah(); };
+      w.querySelector('.add .btn').onclick = tambah; ai.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); tambah(); } };
+    }
+    gambar(); return w;
+  }
+  function kartu(judul, isi) { const c = el(`<div class="card">${judul ? `<h3>${judul}</h3>` : ''}</div>`); (Array.isArray(isi) ? isi : [isi]).forEach(x => x && c.appendChild(x)); return c; }
+
+  /* ================= 1. Template ================= */
+  function rTemplate(m) {
+    m.innerHTML = `<h2>Pilih template</h2><p class="desc">Mulai dari template yang paling mirip dengan usaha Anda. Semua isi, warna, dan pertanyaan bisa diubah nanti.</p><div class="tpls" id="tpls"></div>`;
+    $('tpls').innerHTML = Object.keys(FU.TEMPLATE).map(k => {
+      const t = FU.TEMPLATE[k], c = t.buat(), p = FU.palet(c.tema);
+      return `<button class="tpl${S.cfg.template === k ? ' on' : ''}" data-k="${k}"><span class="cek">✓</span>
+        <div class="tc" style="background:linear-gradient(130deg,${p.p},${p.pGelap});color:${p.diAtasP}"><i>${t.ikon}</i><b>${esc(c.brand.nama)}</b></div>
+        <div class="tb"><b>${esc(t.nama)}</b><small>${esc(t.desk)}</small></div></button>`;
+    }).join('');
+    $('tpls').querySelectorAll('.tpl').forEach(b => b.onclick = () => {
+      const k = b.dataset.k;
+      const ganti = () => { const lama = S.cfg; S.cfg = FU.cfgBaru(k); if (lama.brand.logo) S.cfg.brand.logo = lama.brand.logo; S.buka = null; render(); ubah('awal', false); toast('Template "' + FU.TEMPLATE[k].nama + '" dipakai'); };
+      if (k === S.cfg.template) return;
+      tanyaYakin('Ganti template?', 'Isi pertanyaan dan pengaturan saat ini akan diganti dengan template "' + FU.TEMPLATE[k].nama + '". Logo tetap dipertahankan.', ganti);
+    });
+  }
+
+  /* ================= 2. Tampilan ================= */
+  function rTampilan(m) {
+    const c = S.cfg, b = c.brand, t = c.tema;
+    m.innerHTML = '<h2>Tampilan</h2><p class="desc">Sesuaikan dengan identitas usaha Anda.</p>';
+    // Identitas
+    const logo = el(`<div class="f"><label>Logo <small>(PNG/JPG, otomatis diperkecil)</small></label><div class="logoBox">
+      <div class="logoPrev" id="lp"></div><div><div class="btnrow" style="justify-content:flex-start"><label class="btn sec">Unggah logo<input type="file" accept="image/*" hidden id="lf"></label>
+      <button class="btn ghost" id="lh">Hapus</button></div><div class="hint">Tanpa logo? Pilih ikon:</div>
+      <div class="emojis" id="em"></div></div></div></div>`);
+    const gambarLogo = () => { logo.querySelector('#lp').innerHTML = b.logo ? `<img src="${esc(b.logo)}" alt="">` : esc(b.ikon); logo.querySelector('#lh').classList.toggle('hidden', !b.logo); };
+    logo.querySelector('#em').innerHTML = ['☕', '🍜', '🍰', '🩺', '💆', '🛍️', '🛠️', '🚗', '🏨', '🎪', '📚', '💇', '🏋️', '🧺', '🐾', '⭐'].map(x => `<button type="button">${x}</button>`).join('');
+    logo.querySelectorAll('#em button').forEach(x => x.onclick = () => { b.ikon = x.textContent; b.logo = ''; gambarLogo(); ubah(); });
+    logo.querySelector('#lh').onclick = () => { b.logo = ''; gambarLogo(); ubah(); };
+    logo.querySelector('#lf').onchange = e => { const f = e.target.files[0]; if (f) kecilkan(f).then(d => { b.logo = d; gambarLogo(); ubah(); toast('Logo dipasang'); }).catch(er => toast(er.message, 1)); e.target.value = ''; };
+    gambarLogo();
+    m.appendChild(kartu('🏷️ Identitas usaha', [field('Nama usaha', b.nama, v => b.nama = v, { max: 60 }), field('Tagline <small>(opsional)</small>', b.tagline, v => b.tagline = v, { max: 100, ph: 'Mis. Ngopi santai, cerita hangat' }), logo]));
+
+    // Warna
+    const wr = el(`<div><div class="f"><label>Warna utama</label><div class="sw8" id="wu"></div></div><div class="f"><label>Warna latar</label><div class="sw8" id="wl"></div></div></div>`);
+    const palet = (box, nilai, pilihan, set) => {
+      const g = () => {
+        box.innerHTML = pilihan().map(w => `<button type="button" style="background:${w}" class="${w === nilai() ? 'on' : ''}" data-w="${w}" title="${w}"></button>`).join('') +
+          `<span class="pick" title="Warna lain"><input type="color" value="${nilai()}"></span><input class="in hex" value="${nilai()}" maxlength="7">`;
+        box.querySelectorAll('[data-w]').forEach(x => x.onclick = () => { set(x.dataset.w); g(); });
+        const cp = box.querySelector('input[type=color]'), hx = box.querySelector('.hex');
+        cp.oninput = () => { set(cp.value); hx.value = cp.value; box.querySelectorAll('[data-w]').forEach(x => x.classList.toggle('on', x.dataset.w === cp.value)); };
+        hx.onchange = () => { if (/^#[0-9a-f]{6}$/i.test(hx.value)) { set(hx.value.toLowerCase()); g(); } else hx.value = nilai(); };
+      };
+      g(); return g;
+    };
+    let gl;
+    palet(wr.querySelector('#wu'), () => t.warna, () => FU.WARNA_CEPAT, w => {
+      if (['#ffffff', '#f5f6f8', '#fbf7f0', '#15171c'].indexOf(t.latar) < 0 && !FU.palet(t).latarGelap) t.latar = FU.campur(w, '#ffffff', .93);   // latar berwarna ikut warna utama
+      t.warna = w; ubah(); if (gl) gl(); });
+    gl = palet(wr.querySelector('#wl'), () => t.latar, () => [FU.campur(t.warna, '#ffffff', .93), '#ffffff', '#f5f6f8', '#fbf7f0', FU.campur(t.warna, '#000000', .55), '#15171c']
+      .filter((w, i, a) => a.indexOf(w) === i), w => { t.latar = w; ubah(); });
+    m.appendChild(kartu('🎨 Warna', wr));
+
+    // Latar, font, sudut
+    const pilih = (obj, kunci, set, kelas) => {
+      const box = el(`<div class="${kelas || 'chips'}"></div>`);
+      const g = () => { box.innerHTML = Object.keys(obj).map(k => kelas === 'fonts'
+          ? `<button type="button" data-k="${k}" class="${kunci() === k ? 'on' : ''}"><b style="font-family:'${FU.FONT[k].judul}'">Aa</b><small>${FU.FONT[k].nama}</small></button>`
+          : `<button type="button" class="chip${kunci() === k ? ' on' : ''}" data-k="${k}">${obj[k]}</button>`).join('');
+        box.querySelectorAll('button').forEach(x => x.onclick = () => { set(x.dataset.k); g(); ubah(undefined, false); }); };
+      g(); return box;
+    };
+    const f1 = el('<div class="f"><label>Gaya latar</label></div>'); f1.appendChild(pilih(FU.LATAR, () => t.gaya, v => t.gaya = v));
+    const f2 = el('<div class="f"><label>Huruf</label></div>'); f2.appendChild(pilih(FU.FONT, () => t.font, v => t.font = v, 'fonts'));
+    const f3 = el('<div class="f"><label>Sudut</label></div>'); f3.appendChild(pilih(FU.SUDUT, () => t.sudut, v => t.sudut = v));
+    m.appendChild(kartu('✨ Gaya', [f1, f2, f3]));
+    m.appendChild(kartu('📄 Catatan kaki', field('Teks di bawah form <small>(opsional)</small>', c.footer, v => c.footer = v, { max: 200, ph: 'Mis. Data Anda hanya digunakan untuk peningkatan layanan.' })));
+  }
+  function kecilkan(file) {
+    return new Promise((ok, gagal) => {
+      if (!/^image\//.test(file.type)) return gagal(new Error('File harus berupa gambar'));
+      const r = new FileReader();
+      r.onload = () => { const img = new Image(); img.onload = () => {
+        const s = Math.min(1, 256 / Math.max(img.width, img.height)), cv = document.createElement('canvas');
+        cv.width = Math.round(img.width * s); cv.height = Math.round(img.height * s);
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+        let d = cv.toDataURL('image/png'); if (d.length > 150000) d = cv.toDataURL('image/webp', .85); if (d.length > 150000 || !/^data:image\/webp/.test(d) && d.length > 150000) d = cv.toDataURL('image/jpeg', .85);
+        d.length > 210000 ? gagal(new Error('Logo terlalu besar')) : ok(d);
+      }; img.onerror = () => gagal(new Error('Gambar tidak bisa dibaca')); img.src = r.result; };
+      r.readAsDataURL(file);
+    });
+  }
+
+  /* ================= 3. Sambutan ================= */
+  function rSambutan(m) {
+    const s = S.cfg.sambutan;
+    m.innerHTML = '<h2>Halaman sambutan</h2><p class="desc">Halaman pertama yang dilihat pelanggan setelah memindai QR.</p>';
+    const isi = [field('Judul', s.judul, v => s.judul = v, { max: 160, ke: 'awal' }), field('Teks sambutan', s.teks, v => s.teks = v, { area: 1, max: 400, ke: 'awal' }),
+      field('Tulisan tombol', s.tombol, v => s.tombol = v, { max: 30, ke: 'awal' })];
+    const box = kartu('', [toggle('Tampilkan halaman sambutan', 'Jika dimatikan, form langsung dimulai dari pertanyaan pertama.', s.tampil, v => s.tampil = v, { ke: 'awal', ulang: () => rSambutan(m) })]);
+    m.appendChild(box);
+    if (s.tampil) m.appendChild(kartu('👋 Isi sambutan', isi));
+  }
+
+  /* ================= 4. Pertanyaan ================= */
+  function rPertanyaan(m) {
+    const P = S.cfg.pertanyaan;
+    m.innerHTML = `<h2>Pertanyaan</h2><p class="desc">Ketuk pertanyaan untuk mengubah. Setiap pertanyaan tampil satu per satu di form. <b>${P.length}/${FU.MAKS_PERTANYAAN}</b></p><div class="qs" id="qs"></div>
+      <div style="margin-top:12px"><button class="tambahQ" id="tq">+ Tambah pertanyaan</button><div class="tipes hidden" id="tipes"></div></div>`;
+    const qs = $('qs');
+    P.forEach((q, i) => qs.appendChild(kartuQ(q, i)));
+    $('tipes').innerHTML = Object.keys(FU.TIPE).map(k => `<button data-t="${k}"><span>${FU.TIPE[k].ikon}</span>${FU.TIPE[k].nama}</button>`).join('');
+    $('tq').onclick = () => $('tipes').classList.toggle('hidden');
+    $('tipes').querySelectorAll('button').forEach(b => b.onclick = () => {
+      if (P.length >= FU.MAKS_PERTANYAAN) return toast('Maksimal ' + FU.MAKS_PERTANYAAN + ' pertanyaan', 1);
+      const q = FU.pertanyaanBaru(b.dataset.t); P.push(q); S.buka = q.id; rPertanyaan(m); ubah(q.id, false);
+      setTimeout(() => { const c = qs.querySelector('.qc.open'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 50);
+    });
+  }
+  function kartuQ(q, i) {
+    const P = S.cfg.pertanyaan, T = FU.TIPE[q.tipe], buka = S.buka === q.id;
+    const c = el(`<div class="qc${buka ? ' open' : ''}"><div class="qh"><span class="ic">${T.ikon}</span><span class="t"><b></b><small>${i + 1}. ${T.nama}${q.wajib ? ' · <em>wajib</em>' : ''}</small></span>
+      <button class="ib" data-o="up" ${i ? '' : 'disabled'} title="Naik">${IC.up}</button><button class="ib" data-o="down" ${i < P.length - 1 ? '' : 'disabled'} title="Turun">${IC.down}</button>
+      <button class="ib" data-o="dup" title="Duplikat">${IC.dup}</button><button class="ib del" data-o="del" ${P.length > 1 ? '' : 'disabled'} title="Hapus">${IC.del}</button></div><div class="qb"></div></div>`);
+    const judul = c.querySelector('.qh b'); judul.textContent = q.judul || '(tanpa judul)';
+    const ulang = () => rPertanyaan($('main'));
+    c.querySelector('.qh').onclick = e => {
+      const o = e.target.closest('[data-o]');
+      if (o) {
+        e.stopPropagation();
+        const a = o.dataset.o;
+        if (a === 'up') [P[i - 1], P[i]] = [P[i], P[i - 1]];
+        if (a === 'down') [P[i + 1], P[i]] = [P[i], P[i + 1]];
+        if (a === 'dup') { if (P.length >= FU.MAKS_PERTANYAAN) return toast('Maksimal ' + FU.MAKS_PERTANYAAN, 1); const d = clone(q); d.id = FU.pertanyaanBaru('singkat').id; P.splice(i + 1, 0, d); S.buka = d.id; }
+        if (a === 'del') return tanyaYakin('Hapus pertanyaan?', '"' + q.judul + '" akan dihapus dari form.', () => { P.splice(i, 1); if (S.buka === q.id) S.buka = null; ulang(); ubah(undefined, false); });
+        ulang(); ubah(S.buka || q.id, false); return;
+      }
+      S.buka = buka ? null : q.id; ulang(); if (!buka) pratinjau(q.id, false);
+    };
+    if (!buka) return c;
+    const b = c.querySelector('.qb'), ke = q.id;
+    b.appendChild(field('Pertanyaan', q.judul, v => { q.judul = v; judul.textContent = v || '(tanpa judul)'; }, { max: 200, ke }));
+    b.appendChild(field('Keterangan <small>(opsional)</small>', q.ket, v => q.ket = v, { max: 300, ke }));
+    if (q.tipe !== 'kontak') b.appendChild(toggle('Wajib dijawab', '', q.wajib, v => { q.wajib = v; }, { ke, ulang }));
+    if (q.tipe === 'kontak') {
+      const tb = el(`<div class="f"><label>Kolom yang ditanyakan</label><table class="kt"><tr><th>Kolom</th><th>Tampil</th><th>Wajib</th></tr></table></div>`);
+      const N = { nama: 'Nama', hp: 'No. HP / WhatsApp', email: 'Email', instansi: 'Perusahaan / Instansi' };
+      ['nama', 'hp', 'email', 'instansi'].forEach(k => {
+        const f = q.kontak[k];
+        const tr = el(`<table><tr><td>${N[k]}</td><td><label class="sw"><input type="checkbox" data-a="tampil"><span></span></label></td><td><label class="sw"><input type="checkbox" data-a="wajib"><span></span></label></td></tr></table>`).querySelector('tr');
+        const [ct, cw] = tr.querySelectorAll('input'); ct.checked = f.tampil; cw.checked = f.wajib; cw.disabled = !f.tampil;
+        ct.onchange = () => { f.tampil = ct.checked; if (!ct.checked) f.wajib = false; if (!['nama', 'hp', 'email', 'instansi'].some(x => q.kontak[x].tampil)) { f.tampil = true; ct.checked = true; toast('Minimal satu kolom tampil', 1); } cw.disabled = !f.tampil; cw.checked = f.wajib; q.wajib = Object.keys(q.kontak).some(x => q.kontak[x].wajib); ubah(ke, false); };
+        cw.onchange = () => { f.wajib = cw.checked; q.wajib = Object.keys(q.kontak).some(x => q.kontak[x].wajib); ubah(ke, false); };
+        tb.querySelector('table').appendChild(tr);
+      });
+      b.appendChild(tb);
+      if (q.kontak.instansi.tampil) b.appendChild(field('Label kolom instansi', q.labelInstansi, v => q.labelInstansi = v, { max: 60, ke }));
+      b.querySelectorAll('.kt input[data-a=tampil]')[3].addEventListener('change', ulang);
+    }
+    if (q.tipe === 'bintang' || q.tipe === 'emoji' || q.tipe === 'nps') {
+      if (!Array.isArray(q.alasan)) q.alasan = [];
+      b.appendChild(toggle('Tanya alasan jika nilai rendah', q.tipe === 'nps' ? 'Muncul jika memilih 0–6.' : 'Muncul jika memberi 1–2.', q.tanyaAlasan, v => { q.tanyaAlasan = v; if (v && !q.alasan.length) q.alasan.push('Pelayanan', 'Harga', 'Kualitas'); }, { ke, ulang }));
+      if (q.tanyaAlasan) { const f = el('<div class="f"><label>Pilihan alasan</label></div>'); f.appendChild(daftar(q.alasan, 'Tambah alasan…', 12, ke)); b.appendChild(f); }
+    }
+    if (q.tipe === 'bintangItem') { const f = el('<div class="f"><label>Bagian yang dinilai</label></div>'); f.appendChild(daftar(q.item, 'Tambah bagian…', 10, ke)); b.appendChild(f); }
+    if (q.tipe === 'tunggal' || q.tipe === 'ganda') {
+      const f = el('<div class="f"><label>Pilihan jawaban</label></div>'); f.appendChild(daftar(q.opsi, 'Tambah pilihan…', 15, ke)); b.appendChild(f);
+      b.appendChild(toggle('Tambah pilihan "Lainnya"', 'Pelanggan bisa menulis jawabannya sendiri.', q.lainnya, v => q.lainnya = v, { ke }));
+    }
+    if (q.tipe === 'singkat' || q.tipe === 'panjang') b.appendChild(field('Teks contoh di kotak isian', q.placeholder, v => q.placeholder = v, { max: 120, ke }));
+    return c;
+  }
+
+  /* ================= 5. Selesai ================= */
+  let katAktif = 'puas';
+  function rSelesai(m) {
+    const s = S.cfg.selesai, o = S.cfg.opsi;
+    const NM = { puas: '😍 Puas (≥ 4)', sedang: '🙂 Cukup (3–3,9)', buruk: '😟 Kurang puas (< 3)', netral: '📝 Tanpa penilaian' };
+    m.innerHTML = '<h2>Halaman selesai</h2><p class="desc">Pesan terima kasih menyesuaikan nilai yang diberikan pelanggan. Tulis <code>{nama}</code> untuk menyebut nama pengisi.</p>';
+    const seg = el(`<div class="seg">${Object.keys(NM).map(k => `<button data-k="${k}" class="${k === katAktif ? 'on' : ''}">${NM[k]}</button>`).join('')}</div>`);
+    const isi = el('<div style="margin-top:14px"></div>');
+    const gambar = () => {
+      isi.innerHTML = ''; const x = s[katAktif], ke = 'selesai:' + katAktif;
+      isi.appendChild(field('Judul', x.judul, v => x.judul = v, { max: 120, ke })); isi.appendChild(field('Pesan', x.pesan, v => x.pesan = v, { area: 1, max: 300, ke }));
+    };
+    seg.querySelectorAll('button').forEach(b => b.onclick = () => { katAktif = b.dataset.k; seg.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); gambar(); pratinjau('selesai:' + katAktif, false); });
+    gambar();
+    m.appendChild(kartu('💬 Pesan terima kasih', [seg, isi]));
+
+    // Tombol tautan
+    const lb = el('<div></div>');
+    const PRESET = [['💬 WhatsApp', 'Hubungi kami via WhatsApp', 'https://wa.me/62'], ['⭐ Google Maps', 'Ulas kami di Google Maps', 'https://g.page/r/'], ['📸 Instagram', 'Ikuti Instagram kami', 'https://instagram.com/'], ['🌐 Website', 'Kunjungi website kami', 'https://']];
+    const gl = () => {
+      lb.innerHTML = s.tombol.map((t, i) => `<div class="lnk"><input class="in" data-i="${i}" data-k="label" value="${esc(t.label)}" maxlength="50" placeholder="Tulisan tombol">
+        <input class="in" data-i="${i}" data-k="url" value="${esc(t.url)}" placeholder="https://…"><button class="ib del" data-i="${i}" title="Hapus">${IC.del}</button></div>`).join('') +
+        (s.tombol.length < 4 ? `<div class="hint">Tambah tombol cepat:</div><div class="preset">${PRESET.map((p, i) => `<button data-p="${i}">${p[0]}</button>`).join('')}<button data-p="x">+ Kosong</button></div>` : '') +
+        `<div class="hint">Link harus diawali <code>https://</code>. Contoh WhatsApp: <code>https://wa.me/6281234567890</code></div>`;
+      lb.querySelectorAll('input').forEach(x => x.oninput = () => { s.tombol[+x.dataset.i][x.dataset.k] = x.value; ubah('selesai:' + katAktif); x.style.borderColor = x.dataset.k === 'url' && x.value && !FU.amanUrl(x.value) ? '#e03131' : ''; });
+      lb.querySelectorAll('.del').forEach(x => x.onclick = () => { s.tombol.splice(+x.dataset.i, 1); gl(); ubah('selesai:' + katAktif, false); });
+      lb.querySelectorAll('[data-p]').forEach(x => x.onclick = () => { const p = PRESET[x.dataset.p] || ['', 'Tombol', 'https://']; s.tombol.push({ label: p[1], url: p[2] }); gl(); ubah('selesai:' + katAktif, false); const ins = lb.querySelectorAll('input[data-k=url]'); ins[ins.length - 1].focus(); });
+    };
+    gl();
+    m.appendChild(kartu('🔗 Tombol tautan <small style="font-weight:400;color:var(--mut)">(maks. 4)</small>', lb));
+    m.appendChild(kartu('⚙️ Pengaturan', [
+      toggle('Animasi perayaan', 'Konfeti untuk pelanggan yang puas.', s.animasi, v => s.animasi = v, { ke: 'selesai:' + katAktif }),
+      toggle('Batasi 1 ulasan per hari per perangkat', 'Mencegah pengisian berulang dari HP yang sama.', o.sekaliSehari, v => o.sekaliSehari = v, { ke: 'selesai:' + katAktif }),
+      toggle('Tampilkan tombol "Isi ulasan baru"', 'Cocok untuk tablet/kios di kasir.', o.tombolIsiLagi, v => o.tombolIsiLagi = v, { ke: 'selesai:' + katAktif })
+    ]));
+  }
+
+  /* ================= 6. Hubungkan & terbitkan ================= */
+  const SITUS_URL = () => new URL('./', location.href).href;
+  const linkForm = id => SITUS_URL() + 'f/?s=' + id;
+  function panggil(id, fn, args) {
+    return fetch(FU.urlApi(id), { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn, args }) })
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(j => { if (!j.ok) throw new Error(j.error); return j.data; })
+      .catch(e => { throw /Failed to fetch|NetworkError|Load failed|JSON|Unexpected token|HTTP/i.test(e.message)
+        ? new Error('Server tidak merespons. Pastikan URL benar dan saat Deploy "Who has access" = Anyone.') : e; });
+  }
+  function rTerbit(m) {
+    const k = S.kon, id = FU.idDariUrl(k.url), tmpl = FU.SITUS.templateSheetId;
+    const urlSalin = 'https://docs.google.com/spreadsheets/d/' + tmpl + '/copy';
+    const aktif = !!(S.lis && S.lis.aktif);
+    m.innerHTML = `<h2>Uji coba & aktivasi</h2><p class="desc">Hubungkan ke <b>Google Sheet milik Anda sendiri</b> (±3 menit), lalu uji coba gratis dengan <b>${FU.SITUS.batasUji} ulasan</b>. Jika cocok, aktifkan form untuk ulasan tanpa batas.</p>
+    <div class="card">
+      <div class="step${id ? ' ok' : ''}"><span class="no">${id ? '✓' : 1}</span><div class="sb"><h4>Salin template Google Sheet ke Drive Anda</h4>
+        <p class="hint" style="margin-bottom:10px">Login dengan akun Google yang akan menyimpan data ulasan, lalu klik <b>Buat salinan</b>.</p>
+        <a class="btn sec" href="${esc(urlSalin)}" target="_blank" rel="noopener">${IC.copy}Buat salinan template</a>
+        ${/^ISI_/.test(tmpl) ? '<div class="msg warn">⚠️ ID template belum diisi di <code>assets/inti.js</code> (pengaturan pemilik situs).</div>' : ''}</div></div>
+      <div class="step${id ? ' ok' : ''}"><span class="no">${id ? '✓' : 2}</span><div class="sb"><h4>Pasang (Deploy) sebagai aplikasi web</h4>
+        <ol><li>Di Sheet salinan: menu <b>Ekstensi → Apps Script</b>.</li>
+          <li>Klik tombol biru <b>Deploy → New deployment</b>, pilih jenis ⚙️ <b>Web app</b>.</li>
+          <li>Execute as: <b>Me</b> · Who has access: <b>Anyone</b> → <b>Deploy</b>.</li>
+          <li>Klik <b>Authorize access</b>, pilih akun Anda. Jika muncul "Google hasn't verified this app": klik <b>Advanced → Go to … (unsafe)</b> → <b>Allow</b>. (Aman — script berjalan di akun Anda sendiri.)</li>
+          <li>Salin <b>Web app URL</b> dan tempel di bawah.</li></ol>
+        <div class="f"><input class="in" id="kUrl" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(k.url)}"></div>
+        <div id="mUrl"></div></div></div>
+      <div class="step${S.terbit ? ' ok' : ''}"><span class="no">${S.terbit ? '✓' : 3}</span><div class="sb"><h4>Masukkan kunci admin & ${aktif ? 'terbitkan' : 'mulai uji coba'}</h4>
+        <p class="hint" style="margin-bottom:8px">Kunci ada di tab <b>Mulai</b> pada Google Sheet Anda (format <code>FU-XXXX-XXXX-XXXX</code>). Muncul setelah Sheet dibuka/di-deploy.</p>
+        <div class="f"><input class="in" id="kKunci" placeholder="FU-XXXX-XXXX-XXXX" value="${esc(k.kunci)}" autocomplete="off" style="font-family:ui-monospace,monospace;text-transform:uppercase"></div>
+        <label class="tgl" style="padding:0 0 10px"><span><small>Ingat kunci di perangkat ini</small></span><span class="sw"><input type="checkbox" id="kIngat"${k.ingat ? ' checked' : ''}><span></span></span></label>
+        <div class="btnrow" style="justify-content:flex-start"><button class="btn pri" id="bTerbit">${S.terbit ? '🚀 Terbitkan perubahan' : '🧪 Terbitkan uji coba'}</button>
+        <button class="btn sec" id="bMuat" title="Ambil desain yang sudah tersimpan di Google Sheet">Buka desain dari Sheet</button></div>
+        <div id="mTerbit"></div></div></div>
+    </div><div id="hasil"></div>`;
+    $('kUrl').oninput = e => { k.url = e.target.value.trim(); ubah(); cekUrl(); };
+    $('kKunci').oninput = e => { k.kunci = e.target.value.trim().toUpperCase(); ubah(); };
+    $('kIngat').onchange = e => { k.ingat = e.target.checked; ubah(); };
+    const pesan = (box, kelas, html) => { $(box).innerHTML = html ? `<div class="msg ${kelas}">${html}</div>` : ''; };
+    function cekUrl() {
+      if (!k.url) return pesan('mUrl');
+      if (!FU.idDariUrl(k.url)) return pesan('mUrl', 'err', 'Format URL belum benar. Harus seperti <code>https://script.google.com/macros/s/…/exec</code>');
+      pesan('mUrl', 'info', '<span class="spin dk"></span> Mengecek koneksi…');
+      const id0 = FU.idDariUrl(k.url);
+      fetch(FU.urlApi(id0) + '?api=ping', { redirect: 'follow' }).then(r => r.json()).then(j => {
+        if (FU.idDariUrl(k.url) !== id0) return;
+        j.ok ? pesan('mUrl', 'ok', '✓ Terhubung ke Google Sheet Anda. Lanjut ke langkah 3.') : pesan('mUrl', 'err', esc(j.error));
+      }).catch(() => { if (FU.idDariUrl(k.url) === id0) pesan('mUrl', 'err', 'Belum terhubung. Pastikan URL benar dan saat Deploy "Who has access" = <b>Anyone</b>.'); });
+    }
+    let tCek; $('kUrl').addEventListener('input', () => { clearTimeout(tCek); tCek = setTimeout(cekUrl, 500); });
+    if (k.url) cekUrl();
+    const sibuk = (b, on, teks) => { b.disabled = on; if (on) { b._h = b.innerHTML; b.innerHTML = `<span class="spin${b.classList.contains('sec') ? ' dk' : ''}"></span>${teks}`; } else if (b._h) b.innerHTML = b._h; };
+    const syarat = () => {
+      const id = FU.idDariUrl(k.url);
+      if (!id) { pesan('mTerbit', 'err', 'Isi Web app URL di langkah 2 dulu.'); $('kUrl').focus(); return null; }
+      if (!/^FU-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(k.kunci)) { pesan('mTerbit', 'err', 'Kunci admin belum benar. Salin dari tab <b>Mulai</b> di Google Sheet Anda.'); $('kKunci').focus(); return null; }
+      return id;
+    };
+    $('bTerbit').onclick = () => {
+      const id = syarat(); if (!id) return;
+      const cfg = FU.rapikan(S.cfg), b = $('bTerbit');
+      sibuk(b, true, 'Menerbitkan…'); pesan('mTerbit');
+      panggil(id, 'simpan', [k.kunci, cfg, linkForm(id)])
+        .then(() => panggil(id, 'cek', [k.kunci]).catch(() => ({})))
+        .then(info => { S.terbit = JSON.stringify(cfg); S.link = linkForm(id); S.sheetUrl = info.url || S.sheetUrl; if (info.lisensi) { S.lis = info.lisensi; S.email = info.email; } ubah(); rTerbit(m); toast(S.lis && S.lis.aktif ? '🎉 Form berhasil diterbitkan' : '🧪 Form uji coba siap dicoba'); setTimeout(() => $('hasil').scrollIntoView({ behavior: 'smooth' }), 100); })
+        .catch(e => { sibuk(b, false); pesan('mTerbit', 'err', esc(e.message)); });
+    };
+    $('bMuat').onclick = () => {
+      const id = syarat(); if (!id) return;
+      const b = $('bMuat'); sibuk(b, true, 'Memuat…');
+      panggil(id, 'cek', [k.kunci]).then(info => {
+        sibuk(b, false); S.sheetUrl = info.url || ''; S.lis = info.lisensi || S.lis; S.email = info.email || S.email; ubah();
+        if (!info.cfg) return pesan('mTerbit', 'info', 'Sheet ini belum punya desain. Klik <b>Terbitkan form</b> untuk menyimpan desain saat ini.');
+        tanyaYakin('Ganti dengan desain dari Sheet?', 'Desain di editor akan diganti dengan desain yang tersimpan di "' + (info.nama || 'Google Sheet') + '".', () => {
+          S.cfg = FU.rapikan(info.cfg); S.terbit = JSON.stringify(S.cfg); S.link = linkForm(id); S.buka = null; ubah('awal', false); rTerbit(m); toast('Desain dimuat dari Google Sheet');
+        });
+      }).catch(e => { sibuk(b, false); pesan('mTerbit', 'err', esc(e.message)); });
+    };
+    if (S.terbit && S.link && FU.idDariUrl(k.url) && S.link === linkForm(FU.idDariUrl(k.url))) hasil();
+  }
+  async function hasil() {
+    const L = S.link, id = FU.idDariUrl(S.kon.url), info = S.lis || {};
+    const cek = await FU.cekLisensi(info.lisensi, id);
+    const dasar = `<div class="url"><input class="in" readonly value="${esc(L)}" id="lnk"><button class="btn sec" id="cp">${IC.copy}Salin</button></div>
+      <div class="btnrow"><a class="btn sec" href="${esc(L)}" target="_blank" rel="noopener">${IC.ext}Buka form</a>
+        <a class="btn sec" href="dashboard.html">📊 Dashboard ulasan</a>
+        ${S.sheetUrl ? `<a class="btn sec" href="${esc(S.sheetUrl)}" target="_blank" rel="noopener">🗂️ Google Sheet</a>` : ''}</div>`;
+    if (cek.sah) {
+      $('hasil').innerHTML = `<div class="hasil"><div style="font-size:34px">🎉</div><h3 style="font:600 17px Poppins">Form Anda sudah aktif!</h3>
+        <p class="hint">Lisensi aktif untuk <b>${esc(cek.data.e)}</b>${cek.data.x ? ' sampai ' + esc(cek.data.x) : ''}. Bagikan link atau cetak kode QR ini.</p>${dasar}
+        <div class="qrw"><canvas id="qr"></canvas><div class="btnrow"><button class="btn pri" id="dq">${IC.dl}Unduh kartu QR (PNG)</button></div></div></div>`;
+      kartuQR($('qr'), L);
+      $('dq').onclick = () => { const a = document.createElement('a'); a.download = 'QR-ulasan-' + S.cfg.brand.nama.replace(/[^\w]+/g, '-').toLowerCase() + '.png'; a.href = $('qr').toDataURL('image/png'); a.click(); };
+    } else {
+      const j = Math.min(info.jumlah || 0, FU.SITUS.batasUji), B = FU.SITUS.batasUji;
+      const wa = FU.waAktivasi({ nama: FU.rapikan(S.cfg).brand.nama, email: S.email, id, perpanjang: cek.kedaluwarsa });
+      $('hasil').innerHTML = `<div class="hasil uji"><div style="font-size:34px">🧪</div><h3 style="font:600 17px Poppins">${cek.kedaluwarsa ? 'Lisensi sudah berakhir' : 'Form uji coba sudah aktif'}</h3>
+        <p class="hint">Bagikan link ini ke maksimal <b>${B} orang</b> untuk mencoba, lalu lihat hasilnya di dashboard.</p>
+        <div class="kuota"><div class="kb"><i style="width:${j / B * 100}%"></i></div><small>${j} dari ${B} ulasan uji coba terpakai</small></div>${dasar}
+        <div class="beli"><b>Suka dengan hasilnya?</b><p>Aktifkan form untuk ulasan <b>tanpa batas</b>, kartu QR siap cetak, dan tanpa tanda uji coba.</p>
+          <a class="btn wa" href="${esc(wa)}" target="_blank" rel="noopener">💳 ${cek.kedaluwarsa ? 'Perpanjang lisensi' : 'Buat form (aktifkan)'}</a>
+          <small>Pembayaran melalui WhatsApp admin itekno.id. Lisensi berlaku untuk 1 akun Gmail${S.email ? ': <b>' + esc(S.email) + '</b>' : ''}.<br>Sudah punya lisensi? Pasang di <a href="dashboard.html">dashboard</a>.</small></div></div>`;
+    }
+    $('cp').onclick = () => { $('lnk').select(); (navigator.clipboard ? navigator.clipboard.writeText(L) : Promise.reject()).catch(() => document.execCommand('copy')).finally(() => toast('Link disalin')); };
+  }
+  const kartuQR = (cv, url) => FU.kartuQR(cv, url, FU.rapikan(S.cfg));
+
+  /* ================= Umum ================= */
+  function toast(t, err) { const e = $('toast'); e.textContent = t; e.style.background = err ? '#c92a2a' : '#212529'; e.classList.add('show'); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove('show'), 2600); }
+  function tanyaYakin(j, p, ok) {
+    $('mJudul').textContent = j; $('mPesan').textContent = p; $('modal').classList.add('show');
+    $('mOke').onclick = () => { $('modal').classList.remove('show'); ok(); };
+    $('mBatal').onclick = () => $('modal').classList.remove('show');
+  }
+  $('modal').onclick = e => { if (e.target === $('modal')) $('modal').classList.remove('show'); };
+
+  nav(); render(); statusTerbit();
+  window.FUB = { S: () => S };   // untuk pengujian
+})();
+</script>
+</body>
+</html>

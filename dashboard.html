@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard Ulasan — Form Ulasan itekno.id</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='88'%3E%F0%9F%93%8A%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+  :root{--a:#d71920;--ad:#a8121a;--al:#fdecec;--ink:#1d1f24;--mut:#6b7280;--line:#e6e7eb;--bg:#f5f6f8;--ok:#2b8a3e;--okl:#ebfbee;--wr:#e67700;--wrl:#fff9db;--ease:cubic-bezier(.22,1,.36,1)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font:14px/1.5 'Inter',system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+  button,input,textarea{font:inherit;color:inherit} button{cursor:pointer}
+  .hidden{display:none!important}
+  .top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:10px 18px;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .lg{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink)}
+  .lg i{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--a),var(--ad));display:grid;place-items:center;font-style:normal;font-size:17px}
+  .lg b{font:600 15px 'Poppins';display:block;line-height:1.1} .lg small{font-size:11px;color:var(--mut)}
+  .sp{flex:1}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:0;border-radius:10px;padding:10px 15px;font:600 13.5px 'Poppins',sans-serif;text-decoration:none;white-space:nowrap;transition:all .2s}
+  .btn.pri{background:var(--a);color:#fff} .btn.pri:hover{background:var(--ad)}
+  .btn.sec{background:#fff;border:1.5px solid var(--line);color:var(--ink)} .btn.sec:hover{border-color:#cdd1d8}
+  .btn.wa{background:#25d366;color:#fff;box-shadow:0 10px 20px -12px #25d366}
+  .btn:disabled{opacity:.6;cursor:wait}
+  .w{max-width:1120px;margin:0 auto;padding:22px 18px 80px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:16px;animation:naik .45s var(--ease) both}
+  @keyframes naik{from{opacity:0;transform:translateY(10px)}}
+  .card h3{font:600 15px 'Poppins';margin-bottom:12px}
+  .in{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff}
+  .in:focus{outline:0;border-color:var(--a);box-shadow:0 0 0 3px var(--al)}
+  .f{margin-bottom:12px} .f label{display:block;font-size:12.5px;font-weight:600;color:#495057;margin-bottom:5px}
+  .msg{border-radius:10px;padding:10px 12px;font-size:13px;margin-top:10px} .msg.err{background:var(--al);color:var(--ad)} .msg.ok{background:var(--okl);color:var(--ok)}
+  .spin{display:inline-block;width:16px;height:16px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:putar .8s linear infinite;vertical-align:-3px}
+  .spin.dk{border-color:#dee2e6;border-top-color:var(--a)}
+  @keyframes putar{to{transform:rotate(360deg)}}
+  /* Kepala */
+  .kepala{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+  .lb{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;font-size:26px;background:#fff;border:1px solid var(--line);overflow:hidden}
+  .lb img{width:100%;height:100%;object-fit:contain;padding:6px}
+  .kepala h1{font:700 22px 'Poppins'} .kepala small{color:var(--mut)}
+  .kepala .aksi{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+  /* Lisensi */
+  .lis{display:grid;grid-template-columns:1.2fr 1fr;gap:20px;border-width:1.5px}
+  .lis.uji{background:linear-gradient(135deg,#fff,var(--wrl));border-color:#ffe066}
+  .lis.aktif{background:linear-gradient(135deg,#fff,var(--okl));border-color:#b2f2bb}
+  .lis.mati{background:linear-gradient(135deg,#fff,var(--al));border-color:#ffc9c9}
+  .badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;font:600 12px 'Poppins';margin-bottom:8px}
+  .uji .badge{background:#ffec99;color:#7a5600} .aktif .badge{background:#d3f9d8;color:var(--ok)} .mati .badge{background:#ffe3e3;color:var(--ad)}
+  .lis h2{font:700 20px 'Poppins';margin-bottom:4px} .lis p{color:#495057}
+  .kb{height:10px;border-radius:99px;background:rgba(0,0,0,.07);overflow:hidden;margin:14px 0 6px;max-width:360px}.kb i{display:block;height:100%;background:var(--wr);border-radius:99px;transition:width 1s var(--ease)}
+  .lis .kanan{border-left:1px dashed rgba(0,0,0,.12);padding-left:20px}
+  .lis textarea{font-family:ui-monospace,monospace;font-size:12px;min-height:64px;resize:vertical;word-break:break-all}
+  .qrw{display:flex;gap:14px;align-items:center}
+  .qrw canvas{width:120px;height:auto;border-radius:10px;box-shadow:0 8px 20px -12px rgba(0,0,0,.4)}
+  /* Statistik */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+  .st{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;animation:naik .45s var(--ease) both}
+  .st small{color:var(--mut);font-size:12.5px} .st b{display:block;font:700 28px/1.2 'Poppins';margin-top:4px} .st span{font-size:12.5px;color:var(--mut)}
+  .st .bin{color:#fab005;font-size:15px;letter-spacing:1px}
+  .grid2{display:grid;grid-template-columns:1fr 1.4fr;gap:16px}
+  .bar{display:grid;grid-template-columns:150px 1fr 44px;gap:10px;align-items:center;margin-bottom:10px;font-size:13px}
+  .bar .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bar .tr{height:10px;border-radius:99px;background:#f1f3f5;overflow:hidden}.bar .tr i{display:block;height:100%;border-radius:99px;width:0;transition:width 1s var(--ease)}
+  .bar b{text-align:right;font-weight:600}
+  /* Tabel */
+  .tbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+  .tbar .in{max-width:280px}
+  .tw{overflow:auto;border:1px solid var(--line);border-radius:12px;max-height:560px}
+  table{border-collapse:collapse;width:100%;font-size:13px}
+  th{position:sticky;top:0;background:#1f2937;color:#fff;text-align:left;padding:9px 12px;font-weight:600;white-space:nowrap;z-index:1}
+  td{padding:9px 12px;border-bottom:1px solid #f1f3f5;vertical-align:top;max-width:340px}
+  tr:hover td{background:#fafafa}
+  td:first-child{white-space:nowrap} td{min-width:90px}
+  .pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11.5px;font-weight:600;white-space:nowrap}
+  .kosong{text-align:center;padding:40px 10px;color:var(--mut)} .kosong div{font-size:40px}
+  .login{max-width:520px;margin:40px auto}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,30px);opacity:0;background:#212529;color:#fff;padding:10px 16px;border-radius:12px;font-size:13px;z-index:60;transition:all .35s var(--ease);pointer-events:none}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  @media (max-width:900px){ .lis,.grid2{grid-template-columns:1fr} .lis .kanan{border-left:0;padding-left:0;border-top:1px dashed rgba(0,0,0,.12);padding-top:16px} .stats{grid-template-columns:1fr 1fr} .kepala .aksi{margin-left:0} }
+  @media (max-width:520px){ .top .lg small{display:none} .bar{grid-template-columns:100px 1fr 38px} .st b{font-size:23px} }
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="lg" href="./"><i>⭐</i><div><b>Form Ulasan</b><small>Dashboard</small></div></a>
+  <div class="sp"></div>
+  <a class="btn sec" href="buat.html">✏️ Edit desain</a>
+</header>
+<main class="w" id="isi"></main>
+<div class="toast" id="toast"></div>
+
+<script src="assets/inti.js"></script>
+<script src="assets/qrcode.js"></script>
+<script>
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id), esc = FU.esc;
+  const DRAF = 'fu_builder_v1';
+  let B = null; try { B = JSON.parse(localStorage.getItem(DRAF)); } catch (e) {}
+  B = B || { kon: { url: '', kunci: '', ingat: true } }; B.kon = B.kon || { url: '', kunci: '', ingat: true };
+  let D = null, tampilN = 50, cari = '';
+
+  function simpanB() { try { const d = JSON.parse(JSON.stringify(B)); if (!d.kon.ingat) d.kon.kunci = ''; localStorage.setItem(DRAF, JSON.stringify(d)); } catch (e) {} }
+  const id = () => FU.idDariUrl(B.kon.url);
+  function panggil(fn, args) {
+    return fetch(FU.urlApi(id()), { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn, args }) })
+      .then(r => r.json()).then(j => { if (!j.ok) throw new Error(j.error); return j.data; })
+      .catch(e => { throw /Failed to fetch|NetworkError|Load failed|JSON|Unexpected/i.test(e.message) ? new Error('Server tidak merespons. Periksa Web app URL & koneksi internet.') : e; });
+  }
+  function toast(t, err) { const e = $('toast'); e.textContent = t; e.style.background = err ? '#c92a2a' : '#212529'; e.classList.add('show'); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove('show'), 2600); }
+
+  /* ---------- Masuk ---------- */
+  function login(pesan) {
+    $('isi').innerHTML = `<div class="card login"><h3 style="font-size:18px">📊 Masuk ke dashboard ulasan</h3>
+      <p style="color:var(--mut);margin-bottom:14px">Gunakan Web app URL dan kunci admin dari Google Sheet Anda (tab <b>Mulai</b>).</p>
+      <div class="f"><label>Web app URL</label><input class="in" id="lu" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(B.kon.url)}"></div>
+      <div class="f"><label>Kunci admin</label><input class="in" id="lk" placeholder="FU-XXXX-XXXX-XXXX" value="${esc(B.kon.kunci)}" style="font-family:ui-monospace,monospace;text-transform:uppercase"></div>
+      <button class="btn pri" id="lm" style="width:100%">Masuk</button>${pesan ? `<div class="msg err">${esc(pesan)}</div>` : ''}
+      <p style="color:var(--mut);font-size:12.5px;margin-top:14px">Belum punya form? <a href="buat.html">Buat form di sini</a>.</p></div>`;
+    $('lm').onclick = () => { B.kon.url = $('lu').value.trim(); B.kon.kunci = $('lk').value.trim().toUpperCase(); simpanB(); muat(); };
+    $('lk').onkeydown = e => { if (e.key === 'Enter') $('lm').click(); };
+  }
+
+  function muat() {
+    if (!id() || !/^FU-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(B.kon.kunci || '')) return login('');
+    $('isi').innerHTML = '<div class="kosong"><span class="spin dk" style="width:30px;height:30px"></span><p style="margin-top:12px">Memuat data ulasan…</p></div>';
+    Promise.all([panggil('data', [B.kon.kunci]), panggil('cek', [B.kon.kunci]).catch(() => ({}))])
+      .then(([d, c]) => { D = d; D.cfg = c.cfg ? FU.rapikan(c.cfg) : (B.cfg ? FU.rapikan(B.cfg) : null); B.lis = d.lisensi; B.email = d.email; simpanB(); gambar(); })
+      .catch(e => login(e.message));
+  }
+
+  /* ---------- Gambar dashboard ---------- */
+  async function gambar() {
+    const cfg = D.cfg || FU.rapikan({}), br = cfg.brand, link = new URL('f/?s=' + id(), new URL('./', location.href)).href;
+    const L = D.lisensi || {}, cek = await FU.cekLisensi(L.lisensi, id());
+    const aktif = L.aktif && cek.sah;
+    const kelas = aktif ? 'aktif' : (L.status && L.status !== 'uji') || (L.aktif && !cek.sah) ? 'mati' : 'uji';
+    const B_ = L.batas || FU.SITUS.batasUji, j = Math.min(L.jumlah || 0, B_);
+    const wa = FU.waAktivasi({ nama: br.nama, email: D.email, id: id(), perpanjang: kelas === 'mati' });
+    let kiri;
+    if (kelas === 'aktif') {
+      const sisa = L.data.x ? Math.ceil((new Date(L.data.x) - new Date(FU.hariIni())) / 864e5) : null;
+      kiri = `<span class="badge">✅ FORM AKTIF</span><h2>Ulasan tanpa batas</h2>
+        <p>Lisensi untuk <b>${esc(L.data.e)}</b> · ${L.data.x ? `berlaku sampai <b>${esc(L.data.x)}</b> (${sisa} hari lagi)` : 'berlaku <b>selamanya</b>'}</p>
+        ${sisa !== null && sisa <= 14 ? `<p style="margin-top:10px"><a class="btn wa" href="${esc(wa)}" target="_blank" rel="noopener">🔄 Perpanjang lisensi</a></p>` : ''}`;
+    } else if (kelas === 'mati') {
+      kiri = `<span class="badge">⛔ LISENSI TIDAK BERLAKU</span><h2>${L.status === 'kedaluwarsa' ? 'Lisensi sudah berakhir' : 'Lisensi perlu diperbarui'}</h2>
+        <p>${esc(L.alasan || cek.alasan || '')}. Form kembali ke mode uji coba (${j}/${B_} ulasan terpakai).</p>
+        <p style="margin-top:12px"><a class="btn wa" href="${esc(wa)}" target="_blank" rel="noopener">💳 Hubungi admin untuk lisensi</a></p>`;
+    } else {
+      kiri = `<span class="badge">🧪 MODE UJI COBA</span><h2>${j >= B_ ? 'Kuota uji coba sudah habis' : `Sisa ${B_ - j} dari ${B_} ulasan uji coba`}</h2>
+        <p>${j >= B_ ? 'Form tidak menerima ulasan baru sampai diaktifkan.' : 'Bagikan link form ke maksimal ' + B_ + ' orang untuk mencoba.'}</p>
+        <div class="kb"><i style="width:0" data-w="${j / B_ * 100}%"></i></div><small style="color:var(--mut)">${j}/${B_} terpakai</small>
+        <div style="margin-top:16px"><b style="font-family:Poppins">Suka dengan hasilnya?</b><p style="margin:2px 0 12px;color:var(--mut)">Aktifkan form: ulasan tanpa batas, kartu QR siap cetak, tanpa tanda uji coba.</p>
+        <a class="btn wa" href="${esc(wa)}" target="_blank" rel="noopener">💳 Buat form (aktifkan)</a>
+        <p style="font-size:12px;color:var(--mut);margin-top:8px">Pembayaran melalui WhatsApp admin itekno.id · 1 lisensi untuk 1 akun Gmail${D.email ? ' (<b>' + esc(D.email) + '</b>)' : ''}</p></div>`;
+    }
+    const kanan = aktif
+      ? `<h3>Kartu QR</h3><div class="qrw"><canvas id="qr"></canvas><div><p style="color:var(--mut);font-size:13px;margin-bottom:10px">Cetak di meja kasir, struk, atau stiker.</p><button class="btn pri" id="dq">⬇ Unduh PNG</button></div></div>`
+      : `<h3>🔑 Pasang lisensi</h3><p style="color:var(--mut);font-size:13px;margin-bottom:8px">Setelah pembayaran, admin mengirim lisensi lewat WhatsApp. Tempel di sini.</p>
+        <textarea class="in" id="lisIn" placeholder="FUL1.…"></textarea><button class="btn pri" id="lisBtn" style="margin-top:10px;width:100%">Pasang lisensi</button><div id="lisMsg"></div>`;
+
+    // statistik
+    const H = D.header, R = D.rows, iK = H.indexOf('Kategori'), iR = H.indexOf('Rata-rata'), iW = H.indexOf('Waktu');
+    const rata = R.map(r => +r[iR]).filter(v => v > 0), avg = rata.length ? rata.reduce((a, b) => a + b, 0) / rata.length : 0;
+    const kat = { 'Puas': 0, 'Cukup': 0, 'Kurang puas': 0 }; R.forEach(r => { if (kat[r[iK]] !== undefined) kat[r[iK]]++; });
+    const nKat = kat.Puas + kat.Cukup + kat['Kurang puas'];
+    const minggu = R.filter(r => r[iW] && Date.now() - new Date(r[iW]) < 7 * 864e5).length;
+    const nilaiKol = H.map((h, i) => ({ h, i })).filter(x => !['Rata-rata', 'Waktu'].includes(x.h) && R.some(r => typeof r[x.i] === 'number') && R.every(r => r[x.i] === '' || (typeof r[x.i] === 'number' && r[x.i] >= 0 && r[x.i] <= 10)))
+      .map(x => { const v = R.map(r => r[x.i]).filter(v => v !== ''); const nps = v.some(n => n > 5); return { h: x.h, n: v.length, avg: v.reduce((a, b) => a + b, 0) / (v.length || 1), maks: nps ? 10 : 5 }; });
+
+    $('isi').innerHTML = `
+      <div class="kepala"><div class="lb">${br.logo ? `<img src="${esc(br.logo)}" alt="">` : esc(br.ikon)}</div>
+        <div><h1>${esc(br.nama)}</h1><small>Dashboard ulasan · ${esc(D.nama || '')}</small></div>
+        <div class="aksi"><a class="btn sec" href="${esc(link)}" target="_blank" rel="noopener">↗ Buka form</a><button class="btn sec" id="salin">🔗 Salin link</button>
+          ${D.url ? `<a class="btn sec" href="${esc(D.url)}" target="_blank" rel="noopener">🗂️ Google Sheet</a>` : ''}<button class="btn sec" id="muatUlang">↻ Muat ulang</button></div></div>
+      <div class="card lis ${kelas}"><div>${kiri}</div><div class="kanan">${kanan}</div></div>
+      <div class="stats">
+        <div class="st"><small>Total ulasan</small><b>${D.total}</b><span>${minggu} dalam 7 hari terakhir</span></div>
+        <div class="st"><small>Nilai rata-rata</small><b>${avg ? avg.toFixed(1) : '–'}</b><span class="bin">${avg ? '★'.repeat(Math.round(avg)) + '☆'.repeat(5 - Math.round(avg)) : ''}</span></div>
+        <div class="st"><small>Pelanggan puas</small><b>${nKat ? Math.round(kat.Puas / nKat * 100) + '%' : '–'}</b><span>nilai ≥ 4</span></div>
+        <div class="st"><small>Perlu perhatian</small><b>${kat['Kurang puas']}</b><span>ulasan kurang puas</span></div>
+      </div>
+      <div class="grid2">
+        <div class="card"><h3>Tingkat kepuasan</h3>${[['Puas', '#40c057'], ['Cukup', '#fab005'], ['Kurang puas', '#fa5252']].map(([k, w]) =>
+          `<div class="bar"><span class="t">${k}</span><span class="tr"><i style="background:${w}" data-w="${nKat ? kat[k] / nKat * 100 : 0}%"></i></span><b>${kat[k]}</b></div>`).join('')}</div>
+        <div class="card"><h3>Rata-rata per pertanyaan</h3>${nilaiKol.length ? nilaiKol.map(x =>
+          `<div class="bar"><span class="t" title="${esc(x.h)}">${esc(x.h)}</span><span class="tr"><i style="background:var(--a)" data-w="${x.avg / x.maks * 100}%"></i></span><b>${x.avg.toFixed(1)}</b></div>`).join('') : '<p style="color:var(--mut)">Belum ada data penilaian.</p>'}</div>
+      </div>
+      <div class="card"><div class="tbar"><h3 style="margin:0;flex:1">Daftar ulasan <small style="font-weight:400;color:var(--mut)">(terbaru di atas)</small></h3>
+        <input class="in" id="cari" placeholder="🔍 Cari nama, saran…" value="${esc(cari)}"><button class="btn sec" id="csv">⬇ Ekspor CSV</button></div><div id="tabel"></div></div>`;
+
+    requestAnimationFrame(() => setTimeout(() => document.querySelectorAll('[data-w]').forEach(i => i.style.width = i.dataset.w), 60));
+    $('muatUlang').onclick = muat;
+    $('salin').onclick = () => navigator.clipboard.writeText(link).then(() => toast('Link form disalin'));
+    if (aktif) { FU.kartuQR($('qr'), link, cfg); $('dq').onclick = () => { const a = document.createElement('a'); a.download = 'QR-ulasan.png'; a.href = $('qr').toDataURL('image/png'); a.click(); }; }
+    else $('lisBtn').onclick = () => {
+      const v = $('lisIn').value.replace(/\s+/g, ''), b = $('lisBtn');
+      if (!v) return;
+      b.disabled = true; b.innerHTML = '<span class="spin"></span> Memeriksa…';
+      FU.cekLisensi(v, id()).then(c => {
+        if (!c.sah) throw new Error(c.alasan);
+        return panggil('pasangLisensi', [B.kon.kunci, v]);
+      }).then(() => { toast('🎉 Lisensi terpasang. Form aktif!'); muat(); })
+        .catch(e => { b.disabled = false; b.textContent = 'Pasang lisensi'; $('lisMsg').innerHTML = `<div class="msg err">${esc(e.message)}</div>`; });
+    };
+    $('cari').oninput = e => { cari = e.target.value; tampilN = 50; tabel(); };
+    $('csv').onclick = ekspor;
+    tabel();
+  }
+
+  const fmtW = v => { const d = new Date(v); return isNaN(d) ? v : d.toLocaleString('id-ID', { day: '2-digit', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit' }); };
+  const PILL = { 'Puas': ['#ebfbee', '#2b8a3e'], 'Cukup': ['#fff4e6', '#d9480f'], 'Kurang puas': ['#fff5f5', '#c92a2a'] };
+  function sel(h, v) {
+    if (h === 'Waktu') return esc(fmtW(v));
+    if (h === 'Kategori' && PILL[v]) return `<span class="pill" style="background:${PILL[v][0]};color:${PILL[v][1]}">${esc(v)}</span>`;
+    if (typeof v === 'number' && / ★$|^Rata-rata$/.test(h)) return esc(v) + ' <span style="color:#fab005">★</span>';
+    return esc(v);
+  }
+  function tersaring() { const q = cari.trim().toLowerCase(); return q ? D.rows.filter(r => r.join(' ').toLowerCase().includes(q)) : D.rows; }
+  function tabel() {
+    const H = D.header, R = tersaring();
+    if (!D.rows.length) { $('tabel').innerHTML = '<div class="kosong"><div>📭</div><p>Belum ada ulasan. Bagikan link form ke pelanggan Anda.</p></div>'; return; }
+    if (!R.length) { $('tabel').innerHTML = '<div class="kosong"><p>Tidak ada ulasan yang cocok.</p></div>'; return; }
+    $('tabel').innerHTML = `<div class="tw"><table><thead><tr>${H.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${
+      R.slice(0, tampilN).map(r => `<tr>${H.map((h, i) => `<td>${sel(h, r[i])}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+      ${R.length > tampilN ? `<p style="text-align:center;margin-top:12px"><button class="btn sec" id="lagi">Tampilkan lebih banyak (${R.length - tampilN} lagi)</button></p>` : ''}
+      ${D.total > D.rows.length ? `<p style="color:var(--mut);font-size:12px;margin-top:8px">Menampilkan ${D.rows.length} ulasan terbaru dari ${D.total}. Data lengkap ada di Google Sheet.</p>` : ''}`;
+    if ($('lagi')) $('lagi').onclick = () => { tampilN += 100; tabel(); };
+  }
+  function ekspor() {
+    const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+    const csv = [D.header].concat(tersaring().map(r => r.map((v, i) => D.header[i] === 'Waktu' ? fmtW(v) : v))).map(r => r.map(q).join(',')).join('\n');
+    const a = document.createElement('a'); a.download = 'ulasan-' + FU.hariIni() + '.csv'; a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv' })); a.click();
+  }
+
+  muat();
+})();
+</script>
+</body>
+</html>
