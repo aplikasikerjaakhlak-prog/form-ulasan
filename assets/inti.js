@@ -13,11 +13,11 @@
     merekUrl: 'https://itekno.id',
     // ID Google Sheet template (yang berisi script). Klien akan membuat salinannya.
     // Contoh: https://docs.google.com/spreadsheets/d/<ID_INI>/edit
-    templateSheetId: 'ISI_ID_SHEET_TEMPLATE',
+    templateSheetId: '1ZfoyGBplFewmJ9wqkgV8VsDkD5DuRasIVlNOZ-bqsxE/',
     // Nomor WhatsApp admin itekno.id untuk pembelian lisensi (format 62…, tanpa + atau spasi)
-    adminWa: 'ISI_NOMOR_WA',
+    adminWa: '081219967686',
     // Kunci PUBLIK pemeriksa lisensi (dari alat admin lisensi). Sama dengan KUNCI_PUBLIK_N di Code.gs.
-    kunciPublikN: 'ISI_KUNCI_PUBLIK',
+    kunciPublikN: 'y4L2Vfc4fyuaQqm4MGkxLtA91dXqfdmCF-NsnigIVbiWlajQ3PW9N7gsaLCEB2koU3AsUtad25QjdX2BOOV2PzUzx7QLJtxoPlQl_NJPxeF5VD1KmsK4RKcFDf5hUL4dbnOUEnqUyRU93jChUc4rQtkzMczN2a1V2Tcte8gtGOHb29dCdF1UKIZ_qwCFL14QUaR6p9AgH8PoMQteKgPmre7AB79MWsx3JvZP_Jso5lhP99LycH2OSP7GwjJSwHdtvI74_7iwCI4BTI_KQJYLw_7bNasxbNl4d5weJjNYHQ391oJVJiyycFRGiT1_DvfoWsyluPwtzQBv-14QOlOI1w',
     batasUji: 3             // jumlah ulasan pada mode uji coba
   };
 
